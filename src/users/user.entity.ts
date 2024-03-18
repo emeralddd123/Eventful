@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm'
+import { EventModel } from 'src/event/event.entity'
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
 
 export enum UserRole {
     ADMIN = "admin",
@@ -9,24 +10,27 @@ export enum UserRole {
 @Entity('Users')
 export class UserModel {
     @PrimaryGeneratedColumn('uuid')
-    id:string
+    id: string
 
-    @Column({unique:true})
+    @Column({ unique: true })
     email: string
 
     @Column()
-    password:string
+    password: string
 
-    @Column({nullable:true})
+    @Column({ nullable: true })
     firstname: string
 
-    @Column({nullable:true})
+    @Column({ nullable: true })
     lastname: string
 
-    @Column({type: "set", enum:UserRole, default: [UserRole.USER] })
+    @Column({ type: "set", enum: UserRole, default: [UserRole.USER] })
     roles: UserRole[]
 
-    @Column({type: Boolean, default: false})
+    @Column({ type: Boolean, default: false })
     isActive: boolean
+
+    @ManyToOne(() => EventModel, (event) => event.creator) 
+    events: EventModel[];
 
 }

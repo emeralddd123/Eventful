@@ -7,9 +7,10 @@ import * as bcrypt from 'bcrypt';
 import { ActivateUserDto } from './dto/activate-user-dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { EmailService } from 'src/services/email.service';
+import { EmailService } from 'src/email/email.service';
 import { EmailDto } from './dto/email-dto';
 import { ResetPasswordDto } from './dto/reset-password-dto';
+import { UUID } from 'crypto';
 
 @Injectable()
 export class UserService {
@@ -69,7 +70,7 @@ export class UserService {
     this.emailService.sendActivationMail(email, existingUser.firstname, activationToken)
     // logger.info(`Resend Activation process triggered for user: ${email}`)
 
-    return { status: 200, message: `success, an activation email will be re-send to your email`, token:activationToken };
+    return { status: 200, message: `success, an activation email will be re-send to your email`, token: activationToken };
 
   }
 
@@ -105,4 +106,14 @@ export class UserService {
 
     return { status: 200, message: `Password has been reset sucessfully!!` }
   }
+
+  async findOneById(userId: UUID) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error(`User with ID '${userId}' not found`);
+    }
+
+    return user;
+  }
+  
 }

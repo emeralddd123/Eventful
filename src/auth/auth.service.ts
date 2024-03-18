@@ -1,43 +1,42 @@
 import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
+import { JwtService,  } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserModel } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import * as bcrypt from 'bcrypt'
 import { LoginDto } from "./dto/login-dto";
+import { JwtModuleOptions } from "@nestjs/jwt";
+
 
 @Injectable()
 export class AuthService {
+    private jwtOptions: JwtModuleOptions;
     constructor(
         @InjectRepository(UserModel)
         private readonly userRepository: Repository<UserModel>,
-        private jwt: JwtService,
-        private config: ConfigService,
-
-    ) { }
-
-    private async hashPassword(password: string): Promise<string> {
-        const salt = await bcrypt.genSalt(10);
-        return await bcrypt.hash(password, salt);
+        private readonly jwt: JwtService,
+    ) { 
+        this.jwtOptions = {
+            secret: process.env.SECRET_KEY,
+          }
     }
 
     async login(loginDto: LoginDto) {
         const { email, password } = loginDto
         const userExists = await this.userRepository.findOne({ where: { email: email } })
-        const hashedPassword = await this.hashPassword(password)
 
         if (!userExists) {
             return { status: 401, message: "Incorrect login credentials" };
         }
-
-        if (userExists.password !== hashedPassword){
+        const correctPassword = await bcrypt.compare(password, userExists.password)
+        if (!correctPassword){
             return { status: 401, message: "Incorrect login credentials" };
         } else {
             const userData = { ...userExists}
             delete userData['password']
 
-            const token = this.jwt.sign({ user: userData });
+
+            const token = await this.jwt.signAsync({ user: userData }, this.jwtOptions);
 
             return { status: 201, message: 'Success', token };
         }
