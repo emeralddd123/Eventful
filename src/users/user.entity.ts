@@ -1,5 +1,7 @@
 import { EventModel } from 'src/event/event.entity'
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, BeforeInsert, BeforeUpdate } from 'typeorm'
+import { Exclude } from 'class-transformer'
+import * as bcrypt from 'bcrypt'
 
 export enum UserRole {
     ADMIN = "admin",
@@ -15,7 +17,7 @@ export class UserModel {
     @Column({ unique: true })
     email: string
 
-    @Column()
+    @Column({select: true})
     password: string
 
     @Column({ nullable: true })
@@ -30,7 +32,18 @@ export class UserModel {
     @Column({ type: Boolean, default: false })
     isActive: boolean
 
+    async isCorrectPassword(password:string): Promise<boolean> {
+        try {
+            console.log({password, hpassword: this.password})
+            return await bcrypt.compare(password, this.password);
+        } catch (error) {
+            console.error('Error comparing passwords:', error);
+            return false;
+        }
+    }
+
     @ManyToOne(() => EventModel, (event) => event.creator) 
     events: EventModel[];
+
 
 }

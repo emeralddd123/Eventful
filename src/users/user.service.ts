@@ -100,7 +100,7 @@ export class UserService {
 
 
     existingUser.password = await this.hashPassword(password)
-    // await this.userRepository.update(existingUser.password, )
+    await this.userRepository.save(existingUser)
 
     // logger.info(`user: ${email} reset password succesfully`)
 

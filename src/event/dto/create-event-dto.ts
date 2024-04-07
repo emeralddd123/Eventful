@@ -1,4 +1,4 @@
-import { Length, IsEnum } from "@nestjs/class-validator";
+import { Length, IsEnum, IsDateString } from "@nestjs/class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { EventType } from "../event.entity";
 
@@ -16,6 +16,14 @@ export class CreateEventDto {
     @ApiProperty()
     @Length(3, 355)
     location: string
+
+    @ApiProperty()
+    @IsDateString()
+    startDate?: Date;
+  
+    @ApiProperty()
+    @IsDateString()
+    endDate?: Date;
 
     @ApiProperty({ enum: EventType, default: EventType.PHYSICAL })
     @IsEnum(EventType)

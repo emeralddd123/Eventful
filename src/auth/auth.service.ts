@@ -3,7 +3,6 @@ import { JwtService,  } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserModel } from "src/users/user.entity";
 import { Repository } from "typeorm";
-import * as bcrypt from 'bcrypt'
 import { LoginDto } from "./dto/login-dto";
 import { JwtModuleOptions } from "@nestjs/jwt";
 
@@ -24,11 +23,11 @@ export class AuthService {
     async login(loginDto: LoginDto) {
         const { email, password } = loginDto
         const userExists = await this.userRepository.findOne({ where: { email: email } })
-
+        console.log(userExists)
         if (!userExists) {
             return { status: 401, message: "Incorrect login credentials" };
         }
-        const correctPassword = await bcrypt.compare(password, userExists.password)
+        const correctPassword = await userExists.isCorrectPassword(password)
         if (!correctPassword){
             return { status: 401, message: "Incorrect login credentials" };
         } else {

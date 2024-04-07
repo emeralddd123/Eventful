@@ -28,6 +28,11 @@ export class EventModel {
     @Column({ type: 'enum', enum: EventType, default: 'physical' })
     type: string;
     
+    @Column()
+    startDate: Date
+
+    @Column()
+    endDate: Date
 
     @ManyToOne(() => UserModel, (user) => user.events)
     @JoinColumn({ name: 'creatorId' })
