@@ -1,6 +1,5 @@
 import { EventModel } from 'src/event/event.entity'
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, BeforeInsert, BeforeUpdate } from 'typeorm'
-import { Exclude } from 'class-transformer'
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinTable, ManyToMany} from 'typeorm'
 import * as bcrypt from 'bcrypt'
 
 export enum UserRole {
@@ -43,7 +42,11 @@ export class UserModel {
     }
 
     @ManyToOne(() => EventModel, (event) => event.creator) 
-    events: EventModel[];
+    createdEvents: EventModel[];
+
+    @ManyToMany(() => EventModel, event => event.attendee)
+    @JoinTable()
+    attendedEvents: EventModel[];
 
 
 }

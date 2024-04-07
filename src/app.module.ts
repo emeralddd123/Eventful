@@ -4,20 +4,22 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './users/users.module';
-import { ConfigModule } from '@nestjs/config';
-import { JwtModule, JwtModuleOptions,  } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule, JwtModuleOptions, } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { EventModule } from './event/event.module';
 import { AuthMiddleware } from './common/auth-middleware';
 import { EventController } from './event/event.contoller';
 import { PassportModule } from '@nestjs/passport';
+import { AppConfig, DatabaseConfig } from './config';
 
 ConfigModule.forRoot()
 
 const jwtConfig: JwtModuleOptions = {
   secret: process.env.SECRET_KEY,
   signOptions: { expiresIn: '1h' },
+
 };
 
 
@@ -27,17 +29,16 @@ const jwtConfig: JwtModuleOptions = {
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      cache: true,
+      load: [AppConfig, DatabaseConfig]
     }),
     JwtModule.register(jwtConfig),
-    TypeOrmModule.forRoot({
-      autoLoadEntities:true,
-      type:'mysql',
-      host:process.env.DB_HOST || 'localhost',
-      port:parseInt(process.env.DB_PORT) || 3306,
-      username:process.env.DB_USER,
-      password:process.env.DB_PASS,
-      database:process.env.DB_NAME,
-      // synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        ...configService.get('database'),
+      }),
+      inject: [ConfigService],
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     EmailModule,
@@ -50,9 +51,9 @@ const jwtConfig: JwtModuleOptions = {
 
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-      consumer.apply(AuthMiddleware).forRoutes(EventController)
+    consumer.apply(AuthMiddleware).forRoutes(EventController)
   }
- }
+}
 
 
 
