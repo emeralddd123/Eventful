@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user-dto';
-import { UserModel } from './user.entity';
+import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { ActivateUserDto } from './dto/activate-user-dto';
 import { JwtService } from '@nestjs/jwt';
@@ -11,13 +11,15 @@ import { EmailService } from 'src/email/email.service';
 import { EmailDto } from './dto/email-dto';
 import { ResetPasswordDto } from './dto/reset-password-dto';
 import { UUID } from 'crypto';
+import { UserDto } from './dto/user-dto';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class UserService {
 
   constructor(
-    @InjectRepository(UserModel)
-    private readonly userRepository: Repository<UserModel>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private jwt: JwtService,
     private config: ConfigService,
     private emailService: EmailService
@@ -28,13 +30,20 @@ export class UserService {
     return await bcrypt.hash(password, salt);
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserModel> {
-    const newUser = new UserModel();
+  async create(createUserDto: CreateUserDto): Promise<UserDto> {
+    const newUser = new User();
     newUser.email = createUserDto.email;
     newUser.firstname = createUserDto.firstname;
     newUser.lastname = createUserDto.lastname;
     newUser.password = await this.hashPassword(createUserDto.password);
-    return await this.userRepository.save(newUser);
+    const user = await this.userRepository.save(newUser)
+    const resUser = plainToClass(UserDto, user, {
+      excludeExtraneousValues: true,
+        strategy: 'excludeAll',
+        enableCircularCheck: true,
+      });
+    
+    return resUser
   }
 
   async activateUser(activateUserDto: ActivateUserDto) {
@@ -43,7 +52,7 @@ export class UserService {
       return { status: 400, message: " Invalid Activation Code" }
     }
 
-    const existingUser = await this.userRepository.createQueryBuilder().update(UserModel)
+    const existingUser = await this.userRepository.createQueryBuilder().update(User)
       .set({ isActive: true }).where({ email: validToken.email })
       .execute()
 

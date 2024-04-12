@@ -13,6 +13,9 @@ import { AuthMiddleware } from './common/auth-middleware';
 import { EventController } from './event/event.contoller';
 import { PassportModule } from '@nestjs/passport';
 import { AppConfig, DatabaseConfig } from './config';
+import { User } from './users/user.entity';
+import { Event } from './event/event.entity';
+import { EventUser } from './event/event-user.entity';
 
 ConfigModule.forRoot()
 
@@ -37,6 +40,7 @@ const jwtConfig: JwtModuleOptions = {
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         ...configService.get('database'),
+        entities: [User, Event, EventUser]
       }),
       inject: [ConfigService],
     }),
@@ -55,13 +59,3 @@ export class AppModule implements NestModule {
   }
 }
 
-
-
-// TypeOrmModule.forRootAsync({
-//   imports: [ConfigModule],
-//   useFactory: async (configService: ConfigService) => ({
-//     type: 'mysql',
-//     url: configService.get<string>('MYSQL_DB'),
-//   }),
-//   inject: [ConfigService],
-// }),

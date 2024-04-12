@@ -4,16 +4,36 @@ import { CreateEventDto } from "./dto/create-event-dto";
 import { UUID } from "crypto";
 import { UpdateEventDto } from "./dto/update-event-dto";
 import { FetchEventsDto } from "./dto/fetch-events-dto";
+import { RegisterEventDto } from "./dto/register-event-dto";
 
 @Controller('events')
 export class EventController {
     constructor(private readonly eventService: EventService) { }
+
+    @Get(':id/attendee')
+    async getEventAttendee(@Param('id') id: UUID){
+        return this.eventService.getEventAttendee(id)
+    }
 
     @Get('c-my-events')
     async getMyCreatedEvents(@Query() FetchEventsDto: FetchEventsDto, @Req() req: any) {
         const userId: UUID = req.user.id
         return await this.eventService.myCreatedEvents(userId, FetchEventsDto)
     }
+
+
+    @Get('my-events')
+    async getUserEvents(@Req() req: any) {
+        const userId: UUID = req.user.id
+        return await this.eventService.getUserEvents(userId)
+    }
+
+    @Post('register')
+    async registerForEvent(@Body() registerEventDto: RegisterEventDto, @Req() req: any) {
+        registerEventDto.userId = req.user.id; 
+        return this.eventService.registerUserForEvent(registerEventDto);
+    }
+
 
     @Post('')
     async create(@Body() createEventDto: CreateEventDto, @Req() req: any) {

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { JwtService,  } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
-import { UserModel } from "src/users/user.entity";
+import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import { LoginDto } from "./dto/login-dto";
 import { JwtModuleOptions } from "@nestjs/jwt";
@@ -11,8 +11,8 @@ import { JwtModuleOptions } from "@nestjs/jwt";
 export class AuthService {
     private jwtOptions: JwtModuleOptions;
     constructor(
-        @InjectRepository(UserModel)
-        private readonly userRepository: Repository<UserModel>,
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>,
         private readonly jwt: JwtService,
     ) { 
         this.jwtOptions = {

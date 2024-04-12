@@ -3,13 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UserController } from './user.controller'
 import { UserService } from './user.service';
-import { UserModel } from './user.entity';
+import { User } from './user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { EmailModule } from 'src/email/email.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserModel]),
+  imports: [TypeOrmModule.forFeature([User]),
     JwtModule,
     ConfigModule,
     EmailModule,

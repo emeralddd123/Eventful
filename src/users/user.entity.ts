@@ -1,4 +1,4 @@
-import { EventModel } from 'src/event/event.entity'
+import { Event } from 'src/event/event.entity'
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinTable, ManyToMany} from 'typeorm'
 import * as bcrypt from 'bcrypt'
 
@@ -8,8 +8,8 @@ export enum UserRole {
     MODERATOR = "moderator",
 }
 
-@Entity('Users')
-export class UserModel {
+@Entity('User')
+export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
@@ -41,12 +41,12 @@ export class UserModel {
         }
     }
 
-    @ManyToOne(() => EventModel, (event) => event.creator) 
-    createdEvents: EventModel[];
+    @ManyToOne(() => Event, (event) => event.creator) 
+    createdEvents: Event[];
 
-    @ManyToMany(() => EventModel, event => event.attendee)
+    @ManyToMany(() => Event, event => event.attendee)
     @JoinTable()
-    attendedEvents: EventModel[];
+    attendedEvents: Event[];
 
 
 }

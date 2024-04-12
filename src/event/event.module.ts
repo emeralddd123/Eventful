@@ -1,14 +1,16 @@
 import { Module,MiddlewareConsumer, RequestMethod } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { EventModel } from "./event.entity";
+import { Event } from "./event.entity";
 import { EventService } from "./event.service";
 import { EventController } from "./event.contoller";
 import { UserModule } from "src/users/users.module";
 import { OwnershipMiddleware } from "src/common/event-owner-middleware";
+import { EventUser } from "./event-user.entity";
+import { User } from "src/users/user.entity";
 
 
 @Module({
-    imports: [TypeOrmModule.forFeature([EventModel]), UserModule, ],
+    imports: [TypeOrmModule.forFeature([Event, EventUser, User]), UserModule, ],
     controllers: [EventController],
     providers: [EventService]
 

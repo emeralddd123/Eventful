@@ -10,7 +10,7 @@ import { UUID } from 'crypto';
     @IsEmail()
     email:string
 
-    @Expose()
+    @Exclude()
     @Min(8)
     password:string
 
@@ -18,7 +18,7 @@ import { UUID } from 'crypto';
     @Min(3)
     firstname:string
 
-    @Exclude()
+    @Expose()
     @Min(3)
     lastname:string
 }
