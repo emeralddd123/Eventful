@@ -1,8 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Ticket } from "./ticket.entity";
 import { Repository } from "typeorm";
-import { CreateUserTicketDto, GetTicketDto, TicketIdDto } from "./dto/ticket.dto";
+import { CreateUserTicketDto, GetTicketDto, TicketIdDto, ValidateTicketDto } from "./dto/ticket.dto";
+import { UUID } from "crypto";
 
 @Injectable()
 export class TicketService {
@@ -25,8 +26,17 @@ export class TicketService {
         return this.ticketRepository.findOne({ where: { userId, eventId } });
     }
 
-    async validateTicket(getTicketDto: GetTicketDto): Promise<boolean> {
-        const ticket = await this.getTicket(getTicketDto);
+    async validateTicket(validateTicketDto: ValidateTicketDto): Promise<boolean> {
+        const { userId, ticketId } = validateTicketDto
+        const ticket = await this.ticketRepository.findOne({ where: { id: ticketId, userId: userId } })
         return !!ticket;
+    }
+
+    async getMyTickets(userId: UUID): Promise<Ticket[]> {
+        const tickets = this.ticketRepository.find({ where: { userId: userId }, relations: { event: true } })
+        if (!tickets) {
+            throw new HttpException('No Tickets Found', HttpStatus.NOT_FOUND)
+        }
+        return tickets
     }
 }

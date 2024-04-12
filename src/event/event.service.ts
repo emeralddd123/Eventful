@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Event } from "./event.entity";
 import { Repository } from "typeorm";
@@ -10,8 +10,6 @@ import { FetchEventsDto } from "./dto/fetch-events-dto";
 import { plainToClass } from "class-transformer";
 import { EventResponseDto } from "./dto/eventResponse-dto";
 import { CreatorDto } from "./dto/creator-dto";
-import { User } from "src/users/user.entity";
-import { RegisterEventDto } from "./dto/register-event-dto";
 
 
 export interface EventsWithMetadata {
@@ -31,11 +29,7 @@ export class EventService {
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly userService: UserService,
-
-
   ) { }
 
   async isOwner(eventId: UUID, userId: UUID): Promise<boolean> {
@@ -200,47 +194,17 @@ export class EventService {
     return { events: transformedEvents, metadata };
   }
 
-  async getUserEvents(userId: UUID): Promise<Event[]> {
-    const userEvents = await this.eventRepository.find({
-      // where: { attendee: { id: userId } },
-      // relations: ['attendee'],
-    });
-    return userEvents;
+
+  async getEventTickets(userId: UUID, eventId: UUID) {
+    const event = await this.eventRepository.findOne({ where: { id: eventId }, relations: { tickets: true } });
+
+    if (!event) {
+      throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
+    }
+    if (event.creatorId !== userId) {
+      throw new HttpException('Only the event Creator can view the list of tickets', HttpStatus.FORBIDDEN);
+    }
+    return event;
   }
-
-
-
-  // async registerUserForEvent(registerEventDto: RegisterEventDto) {
-  //   const { userId, eventId } = registerEventDto;
-
-  //   const user = await this.userRepository.findOne({ where: { id: userId } });
-  //   const event = await this.eventRepository.findOne({ where: { id: eventId } });
-
-  //   if (!user || !event) {
-  //     throw new Error('User or event not found');
-  //   }
-
-  //   if (!event.attendee) {
-  //     event.attendee = [];
-  //   }
-
-  //   event.attendee.push(user);
-
-  //   await this.eventRepository.save(event);
-  //   return { message: 'User registered for event successfully', event };
-  // }
-
-  // async getEventAttendee(eventId: UUID) {
-  //   const event = await this.eventRepository.findOne({
-  //     where: { id: eventId },
-  //     relations: ['attendee'],
-  //   });
-
-  //   if (!event) {
-  //     throw new Error('Event not found');
-  //   }
-
-  //   return event.attendee;
-  // }
 
 }

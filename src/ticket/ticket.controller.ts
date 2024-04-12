@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, Get, Param, } from "@nestjs/common";
 import { TicketService } from "./ticket.service";
-import { CreateUserTicketDto, EventIdDto, TicketIdDto } from "./dto/ticket.dto";
+import { CreateUserTicketDto, EventIdDto, TicketIdDto, ValidateTicketDto } from "./dto/ticket.dto";
 import { UUID } from "crypto";
 
 
@@ -9,6 +9,12 @@ import { UUID } from "crypto";
 export class TicketController {
     constructor(private readonly ticketService: TicketService) {
 
+    }
+
+    @Get('me')
+    async getMyTickets(@Req() req: any) {
+        const userId: UUID = req.user.id
+        return this.ticketService.getMyTickets(userId)
     }
 
     @Post('create')
@@ -24,8 +30,10 @@ export class TicketController {
     }
 
     @Post('validate')
-    async validateTicket(@Req() req: any, @Body() body: EventIdDto) {
-        const getTicketDto: CreateUserTicketDto = { userId: req.user.id, eventId: body.eventId }
-        return this.ticketService.validateTicket(getTicketDto)
+    async validateTicket(@Req() req: any, @Body() validateTicketDto: ValidateTicketDto) {
+        validateTicketDto.userId = req.user.id
+        return this.ticketService.validateTicket(validateTicketDto)
     }
+
+
 }

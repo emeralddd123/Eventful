@@ -1,5 +1,5 @@
-
-import { IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 import { UUID } from 'crypto';
 
 export class CreateUserTicketDto {
@@ -7,29 +7,40 @@ export class CreateUserTicketDto {
   userId: UUID;
 
   @IsNotEmpty()
+  @ApiProperty()
   eventId: UUID;
 
 }
 
 export class UpdateUserTicketDto {
-    
+
 }
 
 export class EventIdDto {
-    @IsNotEmpty()
-    eventId: UUID;  
+  @ApiProperty()
+  @IsNotEmpty()
+  eventId: UUID;
 }
 
 export class TicketIdDto {
   @IsNotEmpty()
-  ticketId: UUID;  
+  ticketId: UUID;
 }
 
 
 export class GetTicketDto {
-    @IsNotEmpty()
-    userId: UUID;
-  
-    @IsNotEmpty()
-    eventId: UUID;
+  @IsNotEmpty()
+  userId: UUID;
+
+  @IsNotEmpty()
+  eventId: UUID;
+}
+
+export class ValidateTicketDto {
+  @IsOptional()
+  userId: UUID
+
+  @ApiProperty()
+  @IsNotEmpty()
+  ticketId: UUID;
 }
