@@ -10,10 +10,10 @@ import { RegisterEventDto } from "./dto/register-event-dto";
 export class EventController {
     constructor(private readonly eventService: EventService) { }
 
-    @Get(':id/attendee')
-    async getEventAttendee(@Param('id') id: UUID){
-        return this.eventService.getEventAttendee(id)
-    }
+    // @Get(':id/attendee')
+    // async getEventAttendee(@Param('id') id: UUID){
+    //     return this.eventService.getEventAttendee(id)
+    // }
 
     @Get('c-my-events')
     async getMyCreatedEvents(@Query() FetchEventsDto: FetchEventsDto, @Req() req: any) {
@@ -28,11 +28,11 @@ export class EventController {
         return await this.eventService.getUserEvents(userId)
     }
 
-    @Post('register')
-    async registerForEvent(@Body() registerEventDto: RegisterEventDto, @Req() req: any) {
-        registerEventDto.userId = req.user.id; 
-        return this.eventService.registerUserForEvent(registerEventDto);
-    }
+    // @Post('register')
+    // async registerForEvent(@Body() registerEventDto: RegisterEventDto, @Req() req: any) {
+    //     registerEventDto.userId = req.user.id; 
+    //     return this.eventService.registerUserForEvent(registerEventDto);
+    // }
 
 
     @Post('')
@@ -43,7 +43,7 @@ export class EventController {
 
     @Get('')
     async getAll(@Query() fetchEventsDto: FetchEventsDto) {
-        return await this.eventService.getAll(fetchEventsDto)
+        return await this.eventService.findAll(fetchEventsDto)
     }
 
     @Get(':id')

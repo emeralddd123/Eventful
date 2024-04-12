@@ -13,9 +13,8 @@ import { AuthMiddleware } from './common/auth-middleware';
 import { EventController } from './event/event.contoller';
 import { PassportModule } from '@nestjs/passport';
 import { AppConfig, DatabaseConfig } from './config';
-import { User } from './users/user.entity';
-import { Event } from './event/event.entity';
-import { EventUser } from './event/event-user.entity';
+import { TicketModule } from './ticket/ticket.module';
+import { TicketController } from './ticket/ticket.controller';
 
 ConfigModule.forRoot()
 
@@ -40,7 +39,6 @@ const jwtConfig: JwtModuleOptions = {
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         ...configService.get('database'),
-        entities: [User, Event, EventUser]
       }),
       inject: [ConfigService],
     }),
@@ -48,14 +46,17 @@ const jwtConfig: JwtModuleOptions = {
     EmailModule,
     UserModule,
     AuthModule,
-    EventModule
+    EventModule,
+    TicketModule
   ],
 })
 
 
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes(EventController)
+    consumer.apply(AuthMiddleware).forRoutes(EventController),
+    consumer.apply(AuthMiddleware).forRoutes(TicketController)
+  
   }
 }
 

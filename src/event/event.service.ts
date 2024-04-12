@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EventModel } from "./event.entity";
+import { Event } from "./event.entity";
 import { Repository } from "typeorm";
 import { CreateEventDto } from "./dto/create-event-dto";
 import { UserService } from "src/users/user.service";
@@ -10,6 +10,8 @@ import { FetchEventsDto } from "./dto/fetch-events-dto";
 import { plainToClass } from "class-transformer";
 import { EventResponseDto } from "./dto/eventResponse-dto";
 import { CreatorDto } from "./dto/creator-dto";
+import { User } from "src/users/user.entity";
+import { RegisterEventDto } from "./dto/register-event-dto";
 
 
 export interface EventsWithMetadata {
@@ -27,14 +29,17 @@ export interface EventsWithMetadata {
 @Injectable()
 export class EventService {
   constructor(
-    @InjectRepository(EventModel)
-    private readonly eventRepository: Repository<EventModel>,
+    @InjectRepository(Event)
+    private readonly eventRepository: Repository<Event>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly userService: UserService,
+
 
   ) { }
 
   async isOwner(eventId: UUID, userId: UUID): Promise<boolean> {
-    const event: EventModel = await this.eventRepository.findOne({ where: { id: eventId } });
+    const event: Event = await this.eventRepository.findOne({ where: { id: eventId } });
 
     if (!event || !event.creator) {
       return false;
@@ -43,11 +48,11 @@ export class EventService {
     return event.creator.id === userId;
   }
 
-  async getAll(fetchEventsDto: FetchEventsDto): Promise<EventsWithMetadata> {
+  async findAll(fetchEventsDto: FetchEventsDto): Promise<EventsWithMetadata> {
     const { limit, offset, startDate, endDate, search, type } = fetchEventsDto;
 
     let query = this.eventRepository.createQueryBuilder('event')
-      .leftJoinAndSelect('event.creator', 'owner', 'owner.id = event.creatorId');
+      .leftJoinAndSelect('event.creator', 'user', 'user.id = event.creatorId');
 
     if (startDate) {
       query = query.where('event.startDate >= :startDate', { startDate });
@@ -96,7 +101,7 @@ export class EventService {
   }
 
 
-  async create(createEventDto: CreateEventDto, userId: UUID): Promise<EventModel> {
+  async create(createEventDto: CreateEventDto, userId: UUID): Promise<EventResponseDto> {
     const event = this.eventRepository.create(createEventDto);
 
 
@@ -108,11 +113,17 @@ export class EventService {
 
 
     const savedEvent = await this.eventRepository.save(event);
-    return savedEvent;
+    const creatorRes = plainToClass(CreatorDto, savedEvent.creator)
+    const eventRes = plainToClass(EventResponseDto, savedEvent, {
+      excludeExtraneousValues: true,
+      strategy: 'excludeAll',
+    })
+    eventRes.creator = creatorRes
+    return eventRes;
   }
 
   async findOne(eventId: UUID): Promise<any> {
-    const event = await this.eventRepository.findOne({ where: { id: eventId }, relations: ['creator'] })
+    const event = await this.eventRepository.findOne({ where: { id: eventId }, relations: { creator: true, } })
 
     const creatorRes = plainToClass(CreatorDto, event.creator)
     const eventResponseDto = plainToClass(EventResponseDto, event, {
@@ -125,8 +136,8 @@ export class EventService {
   }
 
 
-  async updateOne(updateEventDto: UpdateEventDto, eventId: UUID): Promise<EventModel> {
-    const eventToUpdate: EventModel = await this.eventRepository.findOne({ where: { id: eventId } });
+  async updateOne(updateEventDto: UpdateEventDto, eventId: UUID): Promise<Event> {
+    const eventToUpdate: Event = await this.eventRepository.findOne({ where: { id: eventId } });
 
     if (!eventToUpdate) {
       return null;
@@ -134,7 +145,7 @@ export class EventService {
 
     Object.assign(eventToUpdate, updateEventDto);
 
-    const updatedEvent: EventModel = await this.eventRepository.save(eventToUpdate);
+    const updatedEvent: Event = await this.eventRepository.save(eventToUpdate);
 
     return updatedEvent;
   }
@@ -188,4 +199,48 @@ export class EventService {
 
     return { events: transformedEvents, metadata };
   }
+
+  async getUserEvents(userId: UUID): Promise<Event[]> {
+    const userEvents = await this.eventRepository.find({
+      // where: { attendee: { id: userId } },
+      // relations: ['attendee'],
+    });
+    return userEvents;
+  }
+
+
+
+  // async registerUserForEvent(registerEventDto: RegisterEventDto) {
+  //   const { userId, eventId } = registerEventDto;
+
+  //   const user = await this.userRepository.findOne({ where: { id: userId } });
+  //   const event = await this.eventRepository.findOne({ where: { id: eventId } });
+
+  //   if (!user || !event) {
+  //     throw new Error('User or event not found');
+  //   }
+
+  //   if (!event.attendee) {
+  //     event.attendee = [];
+  //   }
+
+  //   event.attendee.push(user);
+
+  //   await this.eventRepository.save(event);
+  //   return { message: 'User registered for event successfully', event };
+  // }
+
+  // async getEventAttendee(eventId: UUID) {
+  //   const event = await this.eventRepository.findOne({
+  //     where: { id: eventId },
+  //     relations: ['attendee'],
+  //   });
+
+  //   if (!event) {
+  //     throw new Error('Event not found');
+  //   }
+
+  //   return event.attendee;
+  // }
+
 }

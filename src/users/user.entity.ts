@@ -1,6 +1,7 @@
 import { Event } from 'src/event/event.entity'
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinTable, ManyToMany} from 'typeorm'
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
 import * as bcrypt from 'bcrypt'
+import { Ticket } from 'src/ticket/ticket.entity'
 
 export enum UserRole {
     ADMIN = "admin",
@@ -8,7 +9,7 @@ export enum UserRole {
     MODERATOR = "moderator",
 }
 
-@Entity('User')
+@Entity({ name: 'users' })
 export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string
@@ -16,7 +17,7 @@ export class User {
     @Column({ unique: true })
     email: string
 
-    @Column({select: true})
+    @Column({ select: true })
     password: string
 
     @Column({ nullable: true })
@@ -31,9 +32,9 @@ export class User {
     @Column({ type: Boolean, default: false })
     isActive: boolean
 
-    async isCorrectPassword(password:string): Promise<boolean> {
+    async isCorrectPassword(password: string): Promise<boolean> {
         try {
-            console.log({password, hpassword: this.password})
+            console.log({ password, hpassword: this.password })
             return await bcrypt.compare(password, this.password);
         } catch (error) {
             console.error('Error comparing passwords:', error);
@@ -41,12 +42,10 @@ export class User {
         }
     }
 
-    @ManyToOne(() => Event, (event) => event.creator) 
+    @OneToMany(() => Event, (event) => event.creator)
     createdEvents: Event[];
 
-    @ManyToMany(() => Event, event => event.attendee)
-    @JoinTable()
-    attendedEvents: Event[];
-
+    @OneToMany(() => Ticket, (ticket) => ticket.event)
+    tickets: Ticket[]
 
 }
