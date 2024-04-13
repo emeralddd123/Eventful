@@ -16,7 +16,9 @@ import { AppConfig, DatabaseConfig } from './config';
 import { TicketModule } from './ticket/ticket.module';
 import { TicketController } from './ticket/ticket.controller';
 import { CacheModule } from '@nestjs/cache-manager';
-import * as redisStore  from 'cache-manager-redis-store';
+import * as redisStore from 'cache-manager-redis-store';
+import { BullModule } from '@nestjs/bull';
+import { NotificationModule } from './notification/notification.module';
 
 
 ConfigModule.forRoot()
@@ -41,6 +43,9 @@ const jwtConfig: JwtModuleOptions = {
       // password: process.env.REDIS_PASSWORD, 
       // no_ready_check: true,
     }),
+    BullModule.forRoot({
+      url: process.env.REDIS_URL || 'redis://localhost:6379',
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
@@ -59,7 +64,8 @@ const jwtConfig: JwtModuleOptions = {
     UserModule,
     AuthModule,
     EventModule,
-    TicketModule
+    TicketModule,
+    NotificationModule
   ],
 })
 
@@ -67,8 +73,8 @@ const jwtConfig: JwtModuleOptions = {
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).forRoutes(EventController),
-    consumer.apply(AuthMiddleware).forRoutes(TicketController)
-  
+      consumer.apply(AuthMiddleware).forRoutes(TicketController)
+
   }
 }
 

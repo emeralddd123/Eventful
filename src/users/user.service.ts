@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user-dto';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import { ActivateUserDto } from './dto/activate-user-dto';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModuleOptions, JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from 'src/email/email.service';
 import { EmailDto } from './dto/email-dto';
@@ -13,17 +13,26 @@ import { ResetPasswordDto } from './dto/reset-password-dto';
 import { UUID } from 'crypto';
 import { UserDto } from './dto/user-dto';
 import { plainToClass } from 'class-transformer';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class UserService {
+  private jwtOptions: JwtModuleOptions;
 
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectQueue('mail_queue')
+    private MailQueue: Queue,
     private jwt: JwtService,
     private config: ConfigService,
     private emailService: EmailService
-  ) { }
+  ) {
+    this.jwtOptions = {
+      secret: process.env.SECRET_KEY,
+    }
+  }
 
   private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
@@ -31,19 +40,27 @@ export class UserService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<UserDto> {
-    const newUser = new User();
-    newUser.email = createUserDto.email;
-    newUser.firstname = createUserDto.firstname;
-    newUser.lastname = createUserDto.lastname;
-    newUser.password = await this.hashPassword(createUserDto.password);
-    const user = await this.userRepository.save(newUser)
-    const resUser = plainToClass(UserDto, user, {
-      excludeExtraneousValues: true,
+    try {
+      const newUser = new User();
+      newUser.email = createUserDto.email;
+      newUser.firstname = createUserDto.firstname;
+      newUser.lastname = createUserDto.lastname;
+      newUser.password = await this.hashPassword(createUserDto.password);
+      const user = await this.userRepository.save(newUser)
+      const resUser = plainToClass(UserDto, user, {
+        excludeExtraneousValues: true,
         strategy: 'excludeAll',
         enableCircularCheck: true,
       });
-    
-    return resUser
+      const activationToken = await this.jwt.signAsync({ email: newUser.email, type: 'activation' }, this.jwtOptions)
+      await this.MailQueue.add('send_activation_mail', { ...resUser, activationToken: activationToken }, { attempts: 2 })
+      console.log(`send activation mail job started for ${resUser.email}`)
+      return resUser
+    } catch (error) {
+      console.log(error)
+      throw new HttpException('An Error Occured', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
   }
 
   async activateUser(activateUserDto: ActivateUserDto) {
@@ -74,9 +91,9 @@ export class UserService {
     if (existingUser.isActive) {
       return { status: 208, message: "Account Already Activated" };
     }
-    const activationToken = this.jwt.sign({ email: email, type: 'activation' })
+    const activationToken = await this.jwt.signAsync({ email: email, type: 'activation' }, this.jwtOptions)
+    await this.MailQueue.add('send_activation_mail', { ...existingUser, activationToken: activationToken }, { attempts: 2 })
 
-    this.emailService.sendActivationMail(email, existingUser.firstname, activationToken)
     // logger.info(`Resend Activation process triggered for user: ${email}`)
 
     return { status: 200, message: `success, an activation email will be re-send to your email`, token: activationToken };
@@ -85,14 +102,13 @@ export class UserService {
 
   async forgotPassword(forgotPasswordDto: EmailDto) {
     const email = forgotPasswordDto.email
-    const token = this.jwt.sign({ email: email, type: 'forgot_password' })
+    const resetToken = await this.jwt.signAsync({ email: email, type: 'forgot_password' }, this.jwtOptions)
     const existingUser = await this.userRepository.findOne({ where: { email: email } })
 
     if (!existingUser) {
       return { status: 404, message: "User With Email doesn't exist on this server" };
     }
-
-    this.emailService.sendForgotPasswordMail(existingUser.email, existingUser.firstname, token)
+    await this.MailQueue.add('send_forgot_password_mail', { ...existingUser, token: resetToken }, { attempts: 2 })
 
     return { status: 200, message: `Password reset message sent to your mail` }
 
@@ -100,7 +116,7 @@ export class UserService {
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
     const { token, password } = resetPasswordDto
-    const decoded = this.jwt.verify(token);
+    const decoded = this.jwt.verify(token, this.jwtOptions);
     if (decoded.type !== 'forgot_password') {
       return { status: 400, message: 'Invalid Reset Password Token' }
     }

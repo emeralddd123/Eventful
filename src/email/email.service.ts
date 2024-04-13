@@ -1,9 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Process, Processor } from "@nestjs/bull";
 import { ConfigService } from "@nestjs/config";
+import { Job } from "bull";
 import * as nodemailer from 'nodemailer'
 
 
-@Injectable()
+
+@Processor('mail_queue')
 export class EmailService {
     private readonly transporter: nodemailer.Transporter
     constructor(
@@ -34,15 +36,18 @@ export class EmailService {
     async generateActivationUrl(activationToken: string): Promise<string> {
         const websiteUrl = this.config.get('WEBSITE_URL') || 'http://localhost:3000';
         return `${websiteUrl}/activate-account?token=${activationToken}`;
-      }
+    }
 
-      async sendActivationMail(email: string, firstname: string, activationToken: string): Promise<void> {
+    @Process('send_activation_mail')
+    async sendActivationMail(job: Job): Promise<void> {
+        const { email, firstname, activationToken } = job.data
+        console.log(job.data)
         const activationUrl = await this.generateActivationUrl(activationToken);
         const data = {
-          from: this.config.get('EMAIL_USER'),
-          to: email,
-          subject: `Email Activation Message. You signed Up at UpBlog`,
-          text: `
+            from: this.config.get('EMAIL_USER'),
+            to: email,
+            subject: `Email Activation Message. You signed Up at Eventful`,
+            text: `
             Dear ${firstname},
     
             Welcome to Eventful, We're excited to have you as a part of our community. To get started, please activate your account by clicking the activation link below:
@@ -51,19 +56,21 @@ export class EmailService {
     
             If you didn't request this activation, please ignore this message. Your account won't be activated until you click the link above.
     
-            Thank you for choosing Upblog. We look forward to providing you with a great experience.
+            Thank you for choosing Eventful. We look forward to providing you with a great experience.
     
             Best regards,
             The Eventful Team
           `,
         };
         this.sendMail(data);
-      }
+    }
 
-      async sendForgotPasswordMail (email:string, firstname:string, token:string): Promise<void> {
+    @Process('send_forgot_password_mail')
+    async sendForgotPasswordMail(job: Job): Promise<void> {
+        const { email, firstname, token } = job.data
         const websiteUrl = this.config.get('WEBSITE_URL') || 'http://localhost:3000';
         const url = `${websiteUrl}/reset-password/${token}`
-    
+
         const data = {
             'from': this.config.get('EMAIL_USER'),
             'to': email,
@@ -80,7 +87,7 @@ export class EmailService {
             The Eventful Team
             `
         }
-    
+
         this.sendMail(data)
     }
 

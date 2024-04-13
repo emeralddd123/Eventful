@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.11.2",
+    "@nestjs/bull": "^10.1.1",
     "@nestjs/cache-manager": "^2.2.2",
     "@nestjs/class-validator": "^0.13.1",
     "@nestjs/common": "^10.0.0",
@@ -40,6 +41,7 @@
     "@types/morgan": "^1.9.9",
     "@types/passport-jwt": "^4.0.1",
     "bcrypt": "^5.1.1",
+    "bull": "^4.12.2",
     "cache-manager": "^5.5.1",
     "cache-manager-redis-store": "^2.0.0",
     "class-transformer": "^0.5.1",
