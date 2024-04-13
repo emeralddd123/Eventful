@@ -1,9 +1,10 @@
-import { Body, Controller, Post, Req, Get, Param, Put, Query } from "@nestjs/common";
+import { Body, Controller, Post, Req, Get, Param, Put, Query, UseInterceptors } from "@nestjs/common";
 import { EventService } from "./event.service";
 import { CreateEventDto } from "./dto/create-event-dto";
 import { UUID } from "crypto";
 import { UpdateEventDto } from "./dto/update-event-dto";
 import { FetchEventsDto } from "./dto/fetch-events-dto";
+import { CacheInterceptor } from "@nestjs/cache-manager";
 
 @Controller('events')
 export class EventController {
@@ -22,11 +23,13 @@ export class EventController {
         return await this.eventService.create(createEventDto, userId)
     }
 
+    @UseInterceptors(CacheInterceptor)
     @Get('')
     async getAll(@Query() fetchEventsDto: FetchEventsDto) {
         return await this.eventService.findAll(fetchEventsDto)
     }
 
+    @UseInterceptors(CacheInterceptor)
     @Get(':id')
     async findOne(@Param('id') id: UUID): Promise<any> {
         return await this.eventService.findOne(id)

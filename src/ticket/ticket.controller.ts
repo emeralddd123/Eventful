@@ -1,7 +1,8 @@
-import { Body, Controller, Post, Req, Get, Param, } from "@nestjs/common";
+import { Body, Controller, Post, Req, Get, Param, UseInterceptors, } from "@nestjs/common";
 import { TicketService } from "./ticket.service";
 import { CreateUserTicketDto, EventIdDto, TicketIdDto, ValidateTicketDto } from "./dto/ticket.dto";
 import { UUID } from "crypto";
+import { CacheInterceptor } from "@nestjs/cache-manager";
 
 
 
@@ -23,6 +24,7 @@ export class TicketController {
         return this.ticketService.createTicket(createUserTicketDto)
     }
 
+    @UseInterceptors(CacheInterceptor)
     @Get(':id')
     async getTicketbyId(@Req() req: any, @Param('id') id: UUID) {
         const ticketIdDto: TicketIdDto = { ticketId: id }

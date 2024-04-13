@@ -23,7 +23,7 @@ export class AuthService {
     async login(loginDto: LoginDto) {
         const { email, password } = loginDto
         const userExists = await this.userRepository.findOne({ where: { email: email } })
-        console.log(userExists)
+
         if (!userExists) {
             return { status: 401, message: "Incorrect login credentials" };
         }
