@@ -34,7 +34,6 @@ export class User {
 
     async isCorrectPassword(password: string): Promise<boolean> {
         try {
-            console.log({ password, hpassword: this.password })
             return await bcrypt.compare(password, this.password);
         } catch (error) {
             console.error('Error comparing passwords:', error);

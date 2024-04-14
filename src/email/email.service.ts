@@ -31,6 +31,16 @@ export class EmailService {
         } catch (err) {
             throw err;
         }
+        console.log('email sent succesfully')
+    }
+
+    async sendMailWithConfig(data: Record<string, any>): Promise<void> {
+        const emailData: nodemailer.SendMailOptions = {
+            from: this.config.get('EMAIL_USER'),
+            ...data,
+        };
+
+        await this.sendMail(emailData);
     }
 
     async generateActivationUrl(activationToken: string): Promise<string> {

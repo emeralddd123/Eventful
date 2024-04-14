@@ -8,7 +8,8 @@ import { CacheInterceptor } from "@nestjs/cache-manager";
 
 @Controller('ticket')
 export class TicketController {
-    constructor(private readonly ticketService: TicketService) {
+    constructor(
+        private readonly ticketService: TicketService) {
 
     }
 

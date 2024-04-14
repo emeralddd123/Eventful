@@ -4,16 +4,23 @@ import { Ticket } from "./ticket.entity";
 import { Repository } from "typeorm";
 import { CreateUserTicketDto, GetTicketDto, TicketIdDto, ValidateTicketDto } from "./dto/ticket.dto";
 import { UUID } from "crypto";
+import { InjectQueue } from "@nestjs/bull";
+import { Queue } from "bull";
 
 @Injectable()
 export class TicketService {
     constructor(
         @InjectRepository(Ticket)
         private ticketRepository: Repository<Ticket>,
+        @InjectQueue('notification_queue')
+        private notificationQueue: Queue,
     ) { }
 
     async createTicket(createUserTicketDto: CreateUserTicketDto): Promise<Ticket> {
-        const ticket = this.ticketRepository.create(createUserTicketDto);
+        const ticket = await this.ticketRepository.create(createUserTicketDto);
+        const ticketData = await this.ticketRepository.findOne({ where: { id: ticket.id }, relations: { event: true, user: true } })
+        console.log({ticketData})
+        this.notificationQueue.add('ticket_purchase', ticketData)
         return this.ticketRepository.save(ticket);
     }
 

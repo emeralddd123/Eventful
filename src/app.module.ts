@@ -65,7 +65,7 @@ const jwtConfig: JwtModuleOptions = {
     AuthModule,
     EventModule,
     TicketModule,
-    NotificationModule
+    NotificationModule,
   ],
 })
 
