@@ -1,47 +1,17 @@
+import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
 import { Process, Processor } from "@nestjs/bull";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Job } from "bull";
-import * as nodemailer from 'nodemailer'
-
 
 
 @Processor('mail_queue')
+@Injectable()
 export class EmailService {
-    private readonly transporter: nodemailer.Transporter
-    constructor(
+    constructor(private mailerService: MailerService,
         private config: ConfigService,
-    ) {
-        const email_config = {
-            service: this.config.get('EMAIL_SERVICE'),
-            host: this.config.get('EMAIL_HOST'),
-            port: this.config.get('EMAIL_PORT') || 587,
-            secure: this.config.get('EMAIL_SECURE') || false,
-            auth: {
-                user: this.config.get('EMAIL_USER'),
-                pass: this.config.get('EMAIL_PASSWORD')
-            }
-        }
+    ) { }
 
-        this.transporter = nodemailer.createTransport(email_config)
-    }
-
-    async sendMail(data: nodemailer.SendMailOptions): Promise<void> {
-        try {
-            await this.transporter.sendMail(data);
-        } catch (err) {
-            throw err;
-        }
-        console.log('email sent succesfully')
-    }
-
-    async sendMailWithConfig(data: Record<string, any>): Promise<void> {
-        const emailData: nodemailer.SendMailOptions = {
-            from: this.config.get('EMAIL_USER'),
-            ...data,
-        };
-
-        await this.sendMail(emailData);
-    }
 
     async generateActivationUrl(activationToken: string): Promise<string> {
         const websiteUrl = this.config.get('WEBSITE_URL') || 'http://localhost:3000';
@@ -51,54 +21,38 @@ export class EmailService {
     @Process('send_activation_mail')
     async sendActivationMail(job: Job): Promise<void> {
         const { email, firstname, activationToken } = job.data
-        console.log(job.data)
-        const activationUrl = await this.generateActivationUrl(activationToken);
-        const data = {
-            from: this.config.get('EMAIL_USER'),
+        const url = await this.generateActivationUrl(activationToken)
+        await this.mailerService.sendMail({
             to: email,
-            subject: `Email Activation Message. You signed Up at Eventful`,
-            text: `
-            Dear ${firstname},
-    
-            Welcome to Eventful, We're excited to have you as a part of our community. To get started, please activate your account by clicking the activation link below:
-    
-            ${activationUrl}
-    
-            If you didn't request this activation, please ignore this message. Your account won't be activated until you click the link above.
-    
-            Thank you for choosing Eventful. We look forward to providing you with a great experience.
-    
-            Best regards,
-            The Eventful Team
-          `,
-        };
-        this.sendMail(data);
+            subject: 'Welcome to Eventful App! Confirm your Email',
+            template: './activation',
+            context: {
+                name: firstname,
+                url: url,
+            },
+        });
     }
 
-    @Process('send_forgot_password_mail')
+    @Process('send_reset_password_mail')
     async sendForgotPasswordMail(job: Job): Promise<void> {
         const { email, firstname, token } = job.data
         const websiteUrl = this.config.get('WEBSITE_URL') || 'http://localhost:3000';
         const url = `${websiteUrl}/reset-password/${token}`
 
-        const data = {
-            'from': this.config.get('EMAIL_USER'),
-            'to': email,
-            'subject': 'Password Reset Request',
-            'text': ` Hi ${firstname},
-    
-            You've requested a password reset for your account. To reset your password, please visit the following link:
-    
-            Reset Your Password: ${url}
-    
-            If you didn't request a password reset, you can ignore this email.
-    
-            Best regards,
-            The Eventful Team
-            `
-        }
+        await this.mailerService.sendMail({
+            to: email,
+            subject: 'Your Forgot Password MAil has arrived from Eventfl App',
+            template: './forgot_password',
+            context: {
+                name: firstname,
+                url: url,
+            },
+        });
+    }
 
-        this.sendMail(data)
+
+    async sendMail(data:ISendMailOptions){
+        return this.mailerService.sendMail(data)
     }
 
 }

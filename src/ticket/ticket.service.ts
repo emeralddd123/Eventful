@@ -17,10 +17,8 @@ export class TicketService {
     ) { }
 
     async createTicket(createUserTicketDto: CreateUserTicketDto): Promise<Ticket> {
-        const ticket = await this.ticketRepository.create(createUserTicketDto);
-        const ticketData = await this.ticketRepository.findOne({ where: { id: ticket.id }, relations: { event: true, user: true } })
-        console.log({ticketData})
-        this.notificationQueue.add('ticket_purchase', ticketData)
+        const ticket = this.ticketRepository.create(createUserTicketDto);
+        this.notificationQueue.add('ticket_purchase', {id: ticket.id})
         return this.ticketRepository.save(ticket);
     }
 

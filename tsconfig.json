@@ -18,5 +18,9 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": false,
     "strict": true
-  }
+  },
+  "include": [
+    "src/**/*.ts", // Include TypeScript files
+    "src/**/*.hbs" // Include Handlebars files
+  ]
 }

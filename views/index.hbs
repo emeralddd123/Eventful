@@ -1,13 +1,78 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>Eventful</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eventful Landing Page</title>
+<link rel="stylesheet" href="/css/style.css">
 </head>
-
 <body>
-    {{ message }}
-</body>
 
+<header>
+    <div class="container">
+        <h1>Eventful</h1>
+        <nav>
+            <ul>
+                <li><a href="#about">About</a></li> 
+                <li><a href="#features">Features</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section id="hero">
+    <div class="container">
+        <h2>Discover Amazing Events Near You</h2>
+        <p>Find and attend exciting events in your area with our Eventful.</p>
+        <a href="#download" class="btn">Download Now</a>
+    </div>
+</section>
+
+<section id="about">
+    <div class="container">
+        <h2>About Us</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed accumsan nisi id magna eleifend, vel mattis sapien posuere.</p>
+    </div>
+</section>
+
+<section id="features">
+    <div class="container">
+        <h2>Features</h2>
+        <div class="feature">
+            <h3>Event Discovery</h3>
+            <p>Discover a wide range of events happening around you.</p>
+        </div>
+        <div class="feature">
+            <h3>Event Details</h3>
+            <p>Get detailed information about each event, including date, time, location, and description.</p>
+        </div>
+        <div class="feature">
+            <h3>Easy Booking</h3>
+            <p>Book tickets for your favorite events quickly and easily.</p>
+        </div>
+    </div>
+</section>
+
+<section id="contact">
+    <div class="container">
+        <h2>Contact Us</h2>
+        <p>Have a question or feedback? Reach out to us!</p>
+        <form>
+            <input type="text" placeholder="Your Name">
+            <input type="email" placeholder="Your Email">
+            <textarea placeholder="Your Message"></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2024 Eventful. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
 </html>
