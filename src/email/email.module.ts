@@ -4,7 +4,7 @@ import { EmailService } from "./email.service";
 import { BullModule } from "@nestjs/bull";
 import { MailerModule } from "@nestjs-modules/mailer";
 import { join } from "path";
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 
 @Global()
 @Module({
@@ -13,8 +13,9 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     }), MailerModule.forRootAsync({
         useFactory: async (config: ConfigService) => ({
             transport: {
+                pool: true,
                 host: config.get('MAIL_HOST'),
-                secure: false,
+                secure: true,
                 port: config.get('MAIL_PORT'),
                 auth: {
                     user: config.get('MAIL_USER'),
@@ -26,7 +27,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
             },
             template: {
                 dir: join(__dirname, 'templates'),
-                adapter: new HandlebarsAdapter(),
+                adapter: new EjsAdapter(),
                 options: {
                     strict: true,
                 },

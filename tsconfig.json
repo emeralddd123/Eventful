@@ -21,6 +21,9 @@
   },
   "include": [
     "src/**/*.ts", // Include TypeScript files
-    "src/**/*.hbs" // Include Handlebars files
+    "src/**/*.hbs",
+    "src/**/*.ejs",
+    "./src/**/*",
+    "migrations/**/*.ts"
   ]
 }
