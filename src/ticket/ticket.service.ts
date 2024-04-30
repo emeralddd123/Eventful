@@ -18,7 +18,7 @@ export class TicketService {
 
     async createTicket(createUserTicketDto: CreateUserTicketDto): Promise<Ticket> {
         const ticket = this.ticketRepository.create(createUserTicketDto);
-        this.notificationQueue.add('ticket_purchase', {id: ticket.id})
+        this.notificationQueue.add('ticket_purchase', { ticketId: ticket.id, userId: createUserTicketDto.userId })
         return this.ticketRepository.save(ticket);
     }
 

@@ -21,8 +21,8 @@
   },
   "include": [
     "src/**/*.ts", // Include TypeScript files
-    "src/**/*.hbs",
-    "src/**/*.ejs",
+    "src/**/**/*.hbs",
+    "src/**/**/*.ejs",
     "./src/**/*",
     "migrations/**/*.ts"
   ]

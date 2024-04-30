@@ -4,8 +4,8 @@ import { TicketService } from "src/ticket/ticket.service";
 import { EmailService } from "src/email/email.service";
 import { ISendMailOptions } from "@nestjs-modules/mailer";
 import { ConfigService } from "@nestjs/config";
-import QRCode from 'qrcode'
-
+import * as qrcode from 'qrcode'
+import { UserService } from "src/users/user.service";
 
 @Processor('notification_queue')
 export class NotificationService {
@@ -14,6 +14,7 @@ export class NotificationService {
         private readonly emailService: EmailService,
         private readonly ticketService: TicketService,
         private readonly config: ConfigService,
+        private readonly userService: UserService
 
 
     ) {
@@ -30,18 +31,18 @@ export class NotificationService {
             console.log(job.data)
             console.log('purchase job started')
 
-            const ticketId = job.data.id
+            const ticketId = job.data.ticketId
+            const user = await this.userService.findOneById(job.data.userId)
             const ticketData = await this.ticketService.getTicketById({ ticketId: ticketId })
 
-            const { id, event, user } = ticketData
+            const { id, event } = ticketData
             const verificationUrl = JSON.stringify(`${this.websiteUrl}/ticket/verify?id=${ticketId}&userId=${user.id}&eventId=${event.id}`)
-            // const qrc = await this.generateQRCode(verificationUrl)
-            let qrc
+            const qrc = await this.generateQrCode(verificationUrl)
             const emailData: ISendMailOptions = {
                 to: user.email,
                 subject: 'Ticket Booking Confirmation',
                 template: './ticket_purchase',
-                context: { name: user.firstname, event, id, qrCode:qrc },
+                context: { name: user.firstname, date: Date.now().toString(), event, id, qrCode:qrc, qUrl:verificationUrl },
                 date: Date.now().toString(),
                 text: `
                 Hi ${user.firstname}, your Ticket for the event: ${event.name} has been succesfully booked. n\
@@ -49,6 +50,7 @@ export class NotificationService {
                 
                 `
             }
+            console.log({qrc})
             console.log(`purchase email started for ${user.email}`)
             await this.emailService.sendMail(emailData)
             console.log(`purchase email sent sucessfully to ${user.email}`)
@@ -57,11 +59,12 @@ export class NotificationService {
         }
     }
 
-    async generateQRCode(data:Text){
+    async generateQrCode(data: string): Promise<string> {
         try {
-            return await QRCode.toDataURL(JSON.stringify(data))
-        } catch (err) {
-            console.log(err)
+          const qrCodeDataURL = await qrcode.toDataURL(data);
+          return qrCodeDataURL;
+        } catch (error) {
+          throw new Error('Failed to generate QR code.');
         }
-    }
+      }
 }
