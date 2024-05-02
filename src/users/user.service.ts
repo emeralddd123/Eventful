@@ -10,7 +10,6 @@ import { ConfigService } from '@nestjs/config';
 import { EmailService } from 'src/email/email.service';
 import { EmailDto } from './dto/email-dto';
 import { ResetPasswordDto } from './dto/reset-password-dto';
-import { UUID } from 'crypto';
 import { UserDto } from './dto/user-dto';
 import { plainToClass } from 'class-transformer';
 import { InjectQueue } from '@nestjs/bull';
@@ -132,7 +131,7 @@ export class UserService {
     return { status: 200, message: `Password has been reset sucessfully!!` }
   }
 
-  async findOneById(userId: UUID) {
+  async findOneById(userId: any) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new Error(`User with ID '${userId}' not found`);

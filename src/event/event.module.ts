@@ -11,8 +11,8 @@ import { User } from "src/users/user.entity";
 @Module({
     imports: [TypeOrmModule.forFeature([Event, User]), UserModule, ],
     controllers: [EventController],
-    providers: [EventService]
-
+    providers: [EventService],
+    exports: [EventService]
 })
 
 export class EventModule {

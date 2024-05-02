@@ -6,12 +6,14 @@ import { ISendMailOptions } from "@nestjs-modules/mailer";
 import { ConfigService } from "@nestjs/config";
 import * as qrcode from 'qrcode'
 import { UserService } from "src/users/user.service";
+import { EventService } from "src/event/event.service";
 
 @Processor('notification_queue')
 export class NotificationService {
     private websiteUrl: string
     constructor(
         private readonly emailService: EmailService,
+        private readonly eventService: EventService,
         private readonly ticketService: TicketService,
         private readonly config: ConfigService,
         private readonly userService: UserService
@@ -22,7 +24,14 @@ export class NotificationService {
 
     }
 
-
+    async generateQrCode(data: string): Promise<string> {
+        try {
+            const qrCodeDataURL = await qrcode.toDataURL(data);
+            return qrCodeDataURL;
+        } catch (error) {
+            throw new Error('Failed to generate QR code.');
+        }
+    }
 
 
     @Process('ticket_purchase')
@@ -42,7 +51,7 @@ export class NotificationService {
                 to: user.email,
                 subject: 'Ticket Booking Confirmation',
                 template: './ticket_purchase',
-                context: { name: user.firstname, date: Date.now().toString(), event, id, qrCode:qrc, qUrl:verificationUrl },
+                context: { name: user.firstname, date: Date.now().toString(), event, id, qrCode: qrc, qUrl: verificationUrl },
                 date: Date.now().toString(),
                 text: `
                 Hi ${user.firstname}, your Ticket for the event: ${event.name} has been succesfully booked. n\
@@ -50,7 +59,7 @@ export class NotificationService {
                 
                 `
             }
-            console.log({qrc})
+            // console.log({ qrc })
             console.log(`purchase email started for ${user.email}`)
             await this.emailService.sendMail(emailData)
             console.log(`purchase email sent sucessfully to ${user.email}`)
@@ -59,12 +68,40 @@ export class NotificationService {
         }
     }
 
-    async generateQrCode(data: string): Promise<string> {
+    @Process('event_reminder')
+    async eventReminder(job: Job) {
         try {
-          const qrCodeDataURL = await qrcode.toDataURL(data);
-          return qrCodeDataURL;
+            console.log(`event_remiinder job strated, `)
+
+            const eventId = job.data.eventId;
+            const userIdArray: Array<string> = job.data.userIdArray;
+
+            const event = await this.eventService.findOne(eventId);
+
+            userIdArray.forEach(async (userId) => {
+                console.log({ userId })
+                const user = await this.userService.findOneById((userId))
+                const emailData: ISendMailOptions = {
+                    to: user.email,
+                    subject: 'Event Reminder',
+                    template: './event_reminder',
+                    context: { name: user.firstname, event, },
+                    date: Date.now().toString(),
+                    text: `
+                Hi ${user.firstname}, just a reminder that event ${event.name} will commence
+                by ${event.startDate}.    `
+                }
+
+                console.log(`event reminder email started for ${user.email}`)
+                await this.emailService.sendMail(emailData)
+            })
+
+
         } catch (error) {
-          throw new Error('Failed to generate QR code.');
+            console.error('Error sending email:', error);
         }
-      }
+
+    }
+
+
 }

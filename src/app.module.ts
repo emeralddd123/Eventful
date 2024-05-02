@@ -19,6 +19,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import { BullModule } from '@nestjs/bull';
 import { NotificationModule } from './notification/notification.module';
+import { JobModule } from './job/job.module';
 
 
 ConfigModule.forRoot()
@@ -66,6 +67,7 @@ const jwtConfig: JwtModuleOptions = {
     EventModule,
     TicketModule,
     NotificationModule,
+    JobModule,
   ],
 })
 

@@ -22,4 +22,7 @@ export class UpdateEventDto {
   @IsEnum(EventType)
   @IsOptional()
   type?: EventType;
+
+  @IsOptional()
+  notified? : boolean
 }

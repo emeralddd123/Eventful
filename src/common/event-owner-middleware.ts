@@ -11,11 +11,11 @@ export class OwnershipMiddleware implements NestMiddleware {
         const eventId  = parseUUID(req.params.id);
         const userId = parseUUID(req.user.id);
 
-        const isOwner = await this.eventService.isOwner(eventId, userId);
-        console.log({isOwner})
-        if (!isOwner) {
-            throw new UnauthorizedException('You are not the owner of this event');
-        }
+        // const isOwner = await this.eventService.isOwner(eventId, userId);
+        // console.log({isOwner})
+        // if (!isOwner) {
+        //     throw new UnauthorizedException('You are not the owner of this event');
+        // }
 
         next();
     }

@@ -130,7 +130,7 @@ export class EventService {
   }
 
 
-  async updateOne(updateEventDto: UpdateEventDto, eventId: UUID): Promise<Event> {
+  async updateOne(updateEventDto: UpdateEventDto, eventId: string): Promise<Event> {
     const eventToUpdate: Event = await this.eventRepository.findOne({ where: { id: eventId } });
 
     if (!eventToUpdate) {
@@ -207,4 +207,17 @@ export class EventService {
     return event;
   }
 
+
+
+  async findUnnotifiedEvents() {
+    const eightHoursFromNow = new Date();
+    eightHoursFromNow.setHours(eightHoursFromNow.getHours() + 8);
+    const events = await this.eventRepository
+      .createQueryBuilder('event')
+      .where('event.startDate <= :startDate', { startDate: eightHoursFromNow })
+      .andWhere('event.notified = :notified', { notified: false })
+      .leftJoinAndSelect('event.tickets', 'ticket')
+      .getMany();
+    return events
+  }
 }

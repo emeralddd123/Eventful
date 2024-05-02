@@ -46,6 +46,9 @@ export class Event {
     @OneToMany(() => Ticket, (ticket) => ticket.event)
     tickets: Ticket[]
 
+    @Column({ default: false})
+    notified: boolean
+
 
     // @ManyToMany(() => User, user => user.attendedEvents)
     // @JoinTable({
