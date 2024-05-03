@@ -24,6 +24,7 @@
     "src/**/**/*.hbs",
     "src/**/**/*.ejs",
     "./src/**/*",
-    "migrations/**/*.ts"
+    "migrations/**/*.ts",
+    "/views/*"
   ]
 }

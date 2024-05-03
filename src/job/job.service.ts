@@ -2,7 +2,6 @@ import { InjectQueue } from "@nestjs/bull";
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { Queue } from "bull";
-import { UUID } from "crypto";
 import { UpdateEventDto } from "src/event/dto/update-event-dto";
 import { EventService } from "src/event/event.service";
 import { TicketService } from "src/ticket/ticket.service";
@@ -41,6 +40,7 @@ export class Jobservice {
                 // Mark the event as notified
                 const updateEventDto: UpdateEventDto = { notified: true }
                 const updatedEvent = await this.eventService.updateOne(updateEventDto, event.id)
+                return updatedEvent
 
             }
         }
