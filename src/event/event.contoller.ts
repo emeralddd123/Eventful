@@ -20,6 +20,7 @@ export class EventController {
     @Post('')
     async create(@Body() createEventDto: CreateEventDto, @Req() req: any) {
         const userId: UUID = req.user.id
+        console.log({createEventDto})
         return await this.eventService.create(createEventDto, userId)
     }
 

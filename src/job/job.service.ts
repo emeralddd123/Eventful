@@ -17,18 +17,15 @@ export class Jobservice {
 
     }
 
-    @Cron(CronExpression.EVERY_DAY_AT_8AM)
+    @Cron(CronExpression.EVERY_HOUR)
     async sendReminderToAttendee() {
         const events = await this.eventService.findUnnotifiedEvents()
-        const eightHoursFromNow = new Date();
-        eightHoursFromNow.setHours(eightHoursFromNow.getHours() + 14);
-
-
+        const now = new Date().getTime();
 
         for (const event of events) {
-            const eventStartDate = new Date(event.startDate);
+            const eventRemindAt = new Date(event.remindAt);
             const userIdSet = new Set<string>();
-            if (eventStartDate.getTime() < eightHoursFromNow.getTime()) {
+            if (eventRemindAt.getTime() >= now) {
                 // Send reminders to attendees
                 for (const ticket of event.tickets) {
                     userIdSet.add(ticket.userId)

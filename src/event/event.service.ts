@@ -96,6 +96,9 @@ export class EventService {
 
 
   async create(createEventDto: CreateEventDto, userId: UUID): Promise<EventResponseDto> {
+    if (!createEventDto.remindAt) {
+      createEventDto.remindAt = new Date(createEventDto.startDate.getTime() - 12 * 60 * 60 * 1000);
+    }
     const event = this.eventRepository.create(createEventDto);
 
 

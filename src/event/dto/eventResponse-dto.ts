@@ -24,5 +24,8 @@ export class EventResponseDto {
     endDate: Date;
 
     @Expose()
+    remindAt: Date;
+
+    @Expose()
     creator: CreatorDto;
 }

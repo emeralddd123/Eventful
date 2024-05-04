@@ -36,6 +36,9 @@ export class Event {
     @Column()
     endDate: Date
 
+    @Column()
+    remindAt: Date
+
     @Column({name: 'creator_id'})
     creatorId: UUID
 
