@@ -10,11 +10,11 @@ import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { EventModule } from './event/event.module';
 import { AuthMiddleware } from './common/auth-middleware';
-import { EventController } from './event/event.contoller';
+import { EventApiController } from './event/controllers/event.api.contoller';
 import { PassportModule } from '@nestjs/passport';
 import { AppConfig, DatabaseConfig } from './config';
 import { TicketModule } from './ticket/ticket.module';
-import { TicketController } from './ticket/ticket.controller';
+import { TicketApiController } from './ticket/controllers/ticket.api.controller';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import { BullModule } from '@nestjs/bull';
@@ -74,8 +74,8 @@ const jwtConfig: JwtModuleOptions = {
 
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes(EventController),
-      consumer.apply(AuthMiddleware).forRoutes(TicketController)
+    consumer.apply(AuthMiddleware).forRoutes(EventApiController),
+      consumer.apply(AuthMiddleware).forRoutes(TicketApiController)
 
   }
 }

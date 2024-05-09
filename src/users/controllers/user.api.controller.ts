@@ -1,12 +1,12 @@
 import { Controller, Post, Body, } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user-dto'
-import { ActivateUserDto } from './dto/activate-user-dto';
-import { EmailDto } from './dto/email-dto';
-import { ResetPasswordDto } from './dto/reset-password-dto';
+import { UserService } from '../user.service';
+import { CreateUserDto } from '../dto/create-user-dto'
+import { ActivateUserDto } from '../dto/activate-user-dto';
+import { EmailDto } from '../dto/email-dto';
+import { ResetPasswordDto } from '../dto/reset-password-dto';
 
-@Controller('user')
-export class UserController {
+@Controller('api/v1/user')
+export class UserApiController {
   constructor(private readonly userService: UserService) { }
 
   @Post('signup')

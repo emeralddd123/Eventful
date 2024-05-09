@@ -1,10 +1,10 @@
 import { Body, Controller, Post } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { LoginDto } from "./dto/login-dto";
+import { AuthService } from "../auth.service";
+import { LoginDto } from "../dto/login-dto";
 
 
-@Controller('auth')
-export class AuthController {
+@Controller('api/v1/auth')
+export class AuthApiController {
     constructor(private readonly authService: AuthService){}
 
     @Post('login')

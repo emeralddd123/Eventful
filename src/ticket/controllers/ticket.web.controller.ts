@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, Get, Param, UseInterceptors, } from "@nestjs/common";
-import { TicketService } from "./ticket.service";
-import { CreateUserTicketDto, EventIdDto, TicketIdDto, ValidateTicketDto } from "./dto/ticket.dto";
+import { TicketService } from "../ticket.service";
+import { CreateUserTicketDto, EventIdDto, TicketIdDto, ValidateTicketDto } from "../dto/ticket.dto";
 import { UUID } from "crypto";
 import { CacheInterceptor } from "@nestjs/cache-manager";
 

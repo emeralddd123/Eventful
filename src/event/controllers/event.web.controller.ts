@@ -1,9 +1,9 @@
-import { Body, Controller, Post, Req, Get, Param, Put, Query, UseInterceptors } from "@nestjs/common";
-import { EventService } from "./event.service";
-import { CreateEventDto } from "./dto/create-event-dto";
+import { Body, Controller, Post, Req, Get, Param, Put, Query, UseInterceptors, Render } from "@nestjs/common";
+import { EventService } from "../event.service";
+import { CreateEventDto } from "../dto/create-event-dto";
 import { UUID } from "crypto";
-import { UpdateEventDto } from "./dto/update-event-dto";
-import { FetchEventsDto } from "./dto/fetch-events-dto";
+import { UpdateEventDto } from "../dto/update-event-dto";
+import { FetchEventsDto } from "../dto/fetch-events-dto";
 import { CacheInterceptor } from "@nestjs/cache-manager";
 
 @Controller('events')
@@ -26,8 +26,10 @@ export class EventController {
 
     @UseInterceptors(CacheInterceptor)
     @Get('')
+    @Render('events')
     async getAll(@Query() fetchEventsDto: FetchEventsDto) {
-        return await this.eventService.findAll(fetchEventsDto)
+        const events = await this.eventService.findAll(fetchEventsDto)
+        return { events}
     }
 
     @UseInterceptors(CacheInterceptor)
