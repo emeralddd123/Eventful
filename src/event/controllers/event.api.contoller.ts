@@ -1,12 +1,14 @@
-import { Body, Controller, Post, Req, Get, Param, Put, Query, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Post, Req, Get, Param, Put, Query, UseInterceptors, UseGuards } from "@nestjs/common";
 import { EventService } from "../event.service";
 import { CreateEventDto } from "../dto/create-event-dto";
 import { UUID } from "crypto";
 import { UpdateEventDto } from "../dto/update-event-dto";
 import { FetchEventsDto } from "../dto/fetch-events-dto";
 import { CacheInterceptor } from "@nestjs/cache-manager";
+import { JwtAuthGuard } from "src/auth/guards/jwt.guard";
 
 @Controller('api/v1/events')
+@UseGuards(JwtAuthGuard)
 export class EventApiController {
     constructor(private readonly eventService: EventService) { }
 

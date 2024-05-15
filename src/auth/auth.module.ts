@@ -6,6 +6,8 @@ import { User } from "src/users/user.entity";
 import { JwtModule, JwtModuleOptions } from "@nestjs/jwt";
 import { ConfigModule } from "@nestjs/config";
 import { AuthController } from "./controllers/auth.web.controller";
+import { JwtStrategy } from "./strategies/jwt.strategy";
+import { LocalStrategy } from "./strategies/local.strategy";
 
 const jwtConfig: JwtModuleOptions = {
     secret: process.env.SECRET_KEY,
@@ -16,7 +18,7 @@ const jwtConfig: JwtModuleOptions = {
     JwtModule.register(jwtConfig),
     ConfigModule.forRoot({isGlobal: true})],
     controllers: [AuthApiController, AuthController],
-    providers: [AuthService],
+    providers: [AuthService, JwtStrategy, LocalStrategy],
 })
 
 export class AuthModule { }

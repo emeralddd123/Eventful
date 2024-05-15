@@ -1,12 +1,14 @@
-import { Body, Controller, Post, Req, Get, Param, UseInterceptors, } from "@nestjs/common";
+import { Body, Controller, Post, Req, Get, Param, UseInterceptors, UseGuards, } from "@nestjs/common";
 import { TicketService } from "../ticket.service";
 import { CreateUserTicketDto, EventIdDto, TicketIdDto, ValidateTicketDto } from "../dto/ticket.dto";
 import { UUID } from "crypto";
 import { CacheInterceptor } from "@nestjs/cache-manager";
+import { JwtAuthGuard } from "src/auth/guards/jwt.guard";
 
 
 
 @Controller('api/v1/ticket')
+@UseGuards(JwtAuthGuard)
 export class TicketApiController {
     constructor(
         private readonly ticketService: TicketService) {

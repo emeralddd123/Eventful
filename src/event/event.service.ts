@@ -43,55 +43,62 @@ export class EventService {
   }
 
   async findAll(fetchEventsDto: FetchEventsDto): Promise<EventsWithMetadata> {
-    const { limit, offset, startDate, endDate, search, type } = fetchEventsDto;
+    try {
+      const { limit, offset, startDate, endDate, search, type } = fetchEventsDto;
 
-    let query = this.eventRepository.createQueryBuilder('event')
-      .leftJoinAndSelect('event.creator', 'user', 'user.id = event.creatorId');
+      let query = this.eventRepository.createQueryBuilder('event')
+        .leftJoinAndSelect('event.creator', 'user', 'user.id = event.creatorId');
 
-    if (startDate) {
-      query = query.where('event.startDate >= :startDate', { startDate });
-    }
-    if (endDate) {
-      query = query.andWhere('event.endDate <= :endDate', { endDate });
-    }
-    if (search) {
-      query = query.andWhere('(event.name LIKE :search OR event.description LIKE :search)', { search: `%${search}%` });
-    }
-    if (type) {
-      query = query.andWhere('event.type = :type', { type });
-    }
+      if (startDate) {
+        query = query.where('event.startDate >= :startDate', { startDate });
+      }
+      if (endDate) {
+        query = query.andWhere('event.endDate <= :endDate', { endDate });
+      }
+      if (search) {
+        query = query.andWhere('(event.name LIKE :search OR event.description LIKE :search)', { search: `%${search}%` });
+      }
+      if (type) {
+        query = query.andWhere('event.type = :type', { type });
+      }
 
-    const totalCount = await query.getCount();
+      const totalCount = await query.getCount();
 
-    if (limit) {
-      query = query.limit(limit);
-    }
-    if (offset) {
-      query = query.offset(offset);
-    }
+      if (limit) {
+        query = query.limit(limit);
+      } else {
+        query = query.limit(20);
+      }
+      if (offset) {
+        query = query.offset(offset);
+      }
 
-    const events = await query.getMany();
-    const transformedEvents = events.map(event => {
-      const creatorDto = plainToClass(CreatorDto, event.creator);
-      const eventDto = plainToClass(EventResponseDto, event, {
-        excludeExtraneousValues: true,
-        strategy: 'excludeAll',
-        enableCircularCheck: true,
+      const events = await query.getMany();
+      const transformedEvents = events.map(event => {
+        const creatorDto = plainToClass(CreatorDto, event.creator);
+        const eventDto = plainToClass(EventResponseDto, event, {
+          excludeExtraneousValues: true,
+          strategy: 'excludeAll',
+          enableCircularCheck: true,
+        });
+        eventDto.creator = creatorDto;
+        return eventDto;
       });
-      eventDto.creator = creatorDto;
-      return eventDto;
-    });
 
-    const metadata = {
-      totalCount,
-      limit,
-      offset,
-      startDate,
-      endDate,
-      search
-    };
+      const metadata = {
+        totalCount,
+        limit,
+        offset,
+        startDate,
+        endDate,
+        search
+      };
 
-    return { events: transformedEvents, metadata };
+      return { events: transformedEvents, metadata };
+    } catch (error) {
+      console.error(error);
+      throw new Error('Failed to fetch events');
+    }
   }
 
 

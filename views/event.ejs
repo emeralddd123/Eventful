@@ -1,0 +1,20 @@
+<%- include('./partials/navbar.ejs', {title: 'Welcome to EventBooker' }) %>
+
+    <div class="container">
+        <div class="event-details">
+            <div class="event-image">
+                <img src="event-image.jpg" alt="Event Image">
+            </div>
+            <div class="event-info">
+                <h2><%= event.title %></h2>
+                <p>Date: <%= event.date %></p>
+                <p>Location: <%= event.location %></p>
+                <p>Description: <%= event.description %></p>
+                <p>Owner: <%= event.owner %></p>
+                <button class="register-button">Register</button>
+            </div>
+        </div>
+    </div>
+
+
+    <%- include('./partials/footer.ejs') %>

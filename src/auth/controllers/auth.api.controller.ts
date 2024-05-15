@@ -1,15 +1,18 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Controller, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthService } from "../auth.service";
-import { LoginDto } from "../dto/login-dto";
+import { LocalGuard } from "../guards/local.guard";
+import { Request } from "express";
 
 
 @Controller('api/v1/auth')
 export class AuthApiController {
-    constructor(private readonly authService: AuthService){}
+  constructor(private readonly authService: AuthService) { }
 
-    @Post('login')
-    login(@Body() loginDto:LoginDto) {
-        return this.authService.login(loginDto)
-    }
+  @Post('login')
+  @UseGuards(LocalGuard)
+  login(@Req() req: Request) {
+    return req.user;
+  }
 
+  
 }
