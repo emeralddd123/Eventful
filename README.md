@@ -19,7 +19,7 @@ This project uses NestJS, MySQL, and Redis to build a comprehensive event manage
 - **Backend**: NestJS (Node.js & TypeScript)
 - **Database**: MySQL
 - **Cache**: Redis
-- **Documentation**: OpenAPI (planned)
+- **Documentation**: OpenAPI (planned) and postman doc @ https://documenter.getpostman.com/view/23280484/2sA3JT2dtj
 
 ## Getting Started
 
