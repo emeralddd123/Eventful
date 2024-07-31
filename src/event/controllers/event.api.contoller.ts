@@ -6,9 +6,11 @@ import { UpdateEventDto } from "../dto/update-event-dto";
 import { FetchEventsDto } from "../dto/fetch-events-dto";
 import { CacheInterceptor } from "@nestjs/cache-manager";
 import { JwtAuthGuard } from "src/auth/guards/jwt.guard";
+import { ResponseInterceptor } from "src/common/response.interceptors";
 
 @Controller('api/v1/events')
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(ResponseInterceptor)
 export class EventApiController {
     constructor(private readonly eventService: EventService) { }
 
