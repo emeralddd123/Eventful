@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, Get, Param, UseInterceptors, UseGuards,  } from "@nestjs/common";
 import { TicketService } from "../ticket.service";
-import { CreateUserTicketDto, EventIdDto, TicketIdDto, ValidateTicketDto } from "../dto/ticket.dto";
+import { CreateUserTicketDto, EventIdDto, TicketIdDto, } from "../dto/ticket.dto";
 import { UUID } from "crypto";
 import { CacheInterceptor } from "@nestjs/cache-manager";
 import { JwtAuthGuard } from "src/auth/guards/jwt.guard";
@@ -25,7 +25,7 @@ export class TicketApiController {
 
     @Post('create')
     async createTicket(@Req() req: any, @Body() body: EventIdDto) {
-        const createUserTicketDto: CreateUserTicketDto = { userId: req.user.id, eventId: body.eventId }
+        const createUserTicketDto: CreateUserTicketDto = { userId:req.user.id , eventId: body.eventId }
         return this.ticketService.createTicket(createUserTicketDto)
     }
 
@@ -36,11 +36,15 @@ export class TicketApiController {
         return this.ticketService.getTicketById(ticketIdDto)
     }
 
-    @Post('validate')
-    async validateTicket(@Req() req: any, @Body() validateTicketDto: ValidateTicketDto) {
-        validateTicketDto.userId = req.user.id
-        return this.ticketService.validateTicket(validateTicketDto)
-    }
+    // @Post('validate')
+    // async validateTicket(@Req() req: any, @Body() validateTicketDto: ValidateTicketDto) {
+    //     validateTicketDto.userId = req.user.id
+    //     return this.ticketService.validateTicket(validateTicketDto)
+    // }
 
+    @Get(':id/check')
+    async checkTicket(@Param('id') id: UUID) {
+        return this.ticketService.checkTicket(id)
+    }
 
 }

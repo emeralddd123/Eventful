@@ -7,6 +7,7 @@ import { ConfigService } from "@nestjs/config";
 import * as qrcode from 'qrcode'
 import { UserService } from "src/users/user.service";
 import { EventService } from "src/event/event.service";
+import { TicketPurchaseJobData } from "src/ticket/dto/ticket.dto";
 
 @Processor('notification_queue')
 export class NotificationService {
@@ -35,13 +36,10 @@ export class NotificationService {
 
 
     @Process('ticket_purchase')
-    async ticketPurchase(job: Job): Promise<void> {
+    async ticketPurchase(job: Job<TicketPurchaseJobData>): Promise<void> {
         try {
-            console.log(job.data)
-            console.log('purchase job started')
-
-            const ticketId = job.data.ticketId
-            const user = await this.userService.findOneById(job.data.userId)
+            const {ticketId, userId} = job.data
+            const user = await this.userService.findOneById(userId)
             const ticketData = await this.ticketService.getTicketById({ ticketId: ticketId })
 
             const { id, event } = ticketData
@@ -71,7 +69,7 @@ export class NotificationService {
     @Process('event_reminder')
     async eventReminder(job: Job) {
         try {
-            console.log(`event_remiinder job strated, `)
+            console.log(`event_reminder job strated, `)
 
             const eventId = job.data.eventId;
             const userIdArray: Array<string> = job.data.userIdArray;

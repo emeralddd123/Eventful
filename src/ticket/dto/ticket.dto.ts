@@ -43,4 +43,14 @@ export class ValidateTicketDto {
   @ApiProperty()
   @IsNotEmpty()
   ticketId: UUID;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  eventId: UUID;
+  
+}
+
+export interface TicketPurchaseJobData {
+  ticketId: any;
+  userId: UUID;
 }

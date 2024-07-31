@@ -3,6 +3,10 @@ import { Event } from "src/event/event.entity";
 import { User } from "src/users/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
+enum TicketStatus {
+    UNUSED = 'unused',
+    USED = 'used',
+}
 
 @Entity({ name: 'tickets' })
 export class Ticket {
@@ -23,5 +27,7 @@ export class Ticket {
     @JoinColumn({ name: 'event_id' })
     event: Event
 
+    @Column({ type: 'enum', enum: TicketStatus, default: TicketStatus.UNUSED })
+    status: TicketStatus;
 
 }

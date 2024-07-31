@@ -32,11 +32,11 @@ export class TicketController {
         return this.ticketService.getTicketById(ticketIdDto)
     }
 
-    @Post('validate')
-    async validateTicket(@Req() req: any, @Body() validateTicketDto: ValidateTicketDto) {
-        validateTicketDto.userId = req.user.id
-        return this.ticketService.validateTicket(validateTicketDto)
-    }
+    // @Post('validate')
+    // async validateTicket(@Req() req: any, @Body() validateTicketDto: ValidateTicketDto) {
+    //     validateTicketDto.userId = req.user.id
+    //     return this.ticketService.validateTicket(validateTicketDto)
+    // }
 
 
 }

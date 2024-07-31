@@ -17,6 +17,7 @@ export class EventApiController {
     @Get('c-my-events')
     async getMyCreatedEvents(@Query() FetchEventsDto: FetchEventsDto, @Req() req: any) {
         const userId: UUID = req.user.id
+        console.log({userId})
         return await this.eventService.myCreatedEvents(userId, FetchEventsDto)
     }
 

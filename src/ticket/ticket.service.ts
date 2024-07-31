@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Ticket } from "./ticket.entity";
 import { Repository } from "typeorm";
-import { CreateUserTicketDto, GetTicketDto, TicketIdDto, ValidateTicketDto } from "./dto/ticket.dto";
+import { CreateUserTicketDto, GetTicketDto, TicketIdDto, TicketPurchaseJobData,  } from "./dto/ticket.dto";
 import { UUID } from "crypto";
 import { InjectQueue } from "@nestjs/bull";
 import { Queue } from "bull";
@@ -18,8 +18,10 @@ export class TicketService {
 
     async createTicket(createUserTicketDto: CreateUserTicketDto): Promise<Ticket> {
         const ticket = this.ticketRepository.create(createUserTicketDto);
-        this.notificationQueue.add('ticket_purchase', { ticketId: ticket.id, userId: createUserTicketDto.userId })
-        return this.ticketRepository.save(ticket);
+        const savedTicket = await this.ticketRepository.save(ticket);
+        const ticketPurchaseData: TicketPurchaseJobData = { ticketId: savedTicket.id, userId: createUserTicketDto.userId }
+        this.notificationQueue.add('ticket_purchase', ticketPurchaseData)
+        return savedTicket;
     }
 
     async getTicketById(ticketId: TicketIdDto): Promise<Ticket> {
@@ -31,10 +33,12 @@ export class TicketService {
         return this.ticketRepository.findOne({ where: { userId, eventId } });
     }
 
-    async validateTicket(validateTicketDto: ValidateTicketDto): Promise<boolean> {
-        const { userId, ticketId } = validateTicketDto
-        const ticket = await this.ticketRepository.findOne({ where: { id: ticketId, userId: userId } })
-        return !!ticket;
+    async checkTicket(ticketId:UUID): Promise<any> {
+        const ticket = await this.ticketRepository.findOne({ where: { id: ticketId } })
+        if (!ticket) {
+            throw new NotFoundException('Ticket not found');
+        }
+        return ticket;
     }
 
     async getMyTickets(userId: UUID): Promise<Ticket[]> {
