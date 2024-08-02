@@ -4,7 +4,7 @@
 
 <ul>
     <li><strong>Event:</strong> <%= locals.event.name %></li>
-    <li><strong>Date:</strong> <%= locals.event.date %></li>
+    <li><strong>Date:</strong> <%= locals.event.startDate %></li>
     <li><strong>Location:</strong> <%= locals.event.location %></li>
     <li><strong>Ticket ID:</strong> <%= locals.id %></li>
     <li><strong>Owner:</strong> <%= locals.name %></li>
@@ -12,7 +12,7 @@
 
 <!-- Centered div for QR code -->
 <div style="text-align: center;">
-    <img src=<%= locals.qrCode  %> alt="QR Code">
+    <img src="<%= locals.qrCode  %>" alt="QR Code">
 </div>
 
 <p>Please find attached your ticket in PDF format. Present this ticket at the event entrance for entry.</p>

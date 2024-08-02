@@ -25,10 +25,10 @@ export class NotificationService {
 
     }
 
-    async generateQrCode(data: string): Promise<string> {
+    async generateQrCode(url: string): Promise<string> {
         try {
-            const qrCodeDataURL = await qrcode.toDataURL(data);
-            return qrCodeDataURL;
+            const qrCodeDataURL = await qrcode.toDataURL(url);
+            return qrCodeDataURL
         } catch (error) {
             throw new Error('Failed to generate QR code.');
         }
@@ -38,27 +38,29 @@ export class NotificationService {
     @Process('ticket_purchase')
     async ticketPurchase(job: Job<TicketPurchaseJobData>): Promise<void> {
         try {
-            const {ticketId, userId} = job.data
+            const { ticketId, userId } = job.data
             const user = await this.userService.findOneById(userId)
             const ticketData = await this.ticketService.getTicketById({ ticketId: ticketId })
 
             const { id, event } = ticketData
-            const verificationUrl = JSON.stringify(`${this.websiteUrl}/ticket/verify?id=${ticketId}&userId=${user.id}&eventId=${event.id}`)
+            const verificationUrl = `${this.websiteUrl}/ticket/${ticketId}/check`
             const qrc = await this.generateQrCode(verificationUrl)
             const emailData: ISendMailOptions = {
                 to: user.email,
                 subject: 'Ticket Booking Confirmation',
                 template: './ticket_purchase',
-                context: { name: user.firstname, date: Date.now().toString(), event, id, qrCode: qrc, qUrl: verificationUrl },
+                context: { name: user.firstname, event, id, qrCode: qrc, qUrl: verificationUrl },
                 date: Date.now().toString(),
+                attachDataUrls: true,
+                attachments: [{ filename: 'Ticket_QR_code.png', path: qrc}, ],
                 text: `
                 Hi ${user.firstname}, your Ticket for the event: ${event.name} has been succesfully booked. n\
                 your ticked id: ${id}
                 
                 `
             }
-            // console.log({ qrc })
             console.log(`purchase email started for ${user.email}`)
+            // console.log({uri:qrc, encUri:encodeURI(qrc)})
             await this.emailService.sendMail(emailData)
             console.log(`purchase email sent sucessfully to ${user.email}`)
         } catch (error) {
