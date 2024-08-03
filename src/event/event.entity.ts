@@ -53,21 +53,5 @@ export class Event {
     notified: boolean
 
 
-    // @ManyToMany(() => User, user => user.attendedEvents)
-    // @JoinTable({
-    //     name: 'user_event',
-    //     joinColumn: {
-    //         name:'event_id',
-    //         referencedColumnName: 'id',
-    //         foreignKeyConstraintName: 'event_user_event_id'
-    //     },
-    //     inverseJoinColumn: {
-    //         name: 'user_id',
-    //         referencedColumnName: 'id',
-    //         foreignKeyConstraintName: 'event_user_user_id'
-    //     }
-    // })
-    // attendee: User[];
-
 
 }
