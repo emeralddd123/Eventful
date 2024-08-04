@@ -51,7 +51,6 @@ export class NotificationService {
                 template: './ticket_purchase',
                 context: { name: user.firstname, event, id, qrCode: qrc, qUrl: verificationUrl },
                 date: Date.now().toString(),
-                attachDataUrls: true,
                 attachments: [{ filename: 'Ticket_QR_code.png', path: qrc}, ],
                 text: `
                 Hi ${user.firstname}, your Ticket for the event: ${event.name} has been succesfully booked. n\
