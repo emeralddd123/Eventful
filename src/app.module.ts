@@ -13,7 +13,6 @@ import { PassportModule } from '@nestjs/passport';
 import { AppConfig, DatabaseConfig } from './config';
 import { TicketModule } from './ticket/ticket.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import {redisStore} from 'cache-manager-redis-yet';
 import { NotificationModule } from './notification/notification.module';
 import { JobModule } from './job/job.module';
 
@@ -31,16 +30,7 @@ const jwtConfig: JwtModuleOptions = {
   controllers: [AppController],
   providers: [AppService],
   imports: [
-    CacheModule.register({
-      isGlobal: true,
-      store: redisStore,
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT) || 6379,
-      ttl: 5000,  //time in milliseconds
-      // username: process.env.REDIS_USERNAME, 
-      // password: process.env.REDIS_PASSWORD, 
-      // no_ready_check: true,
-    }),
+    CacheModule.register({isGlobal: true}),
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
