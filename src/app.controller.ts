@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Render } from '@nestjs/common';
+import { Controller, Get, Query, Redirect } from '@nestjs/common';
 import { AppService } from './app.service';
 import * as QRCode from 'qrcode'
 @Controller()
@@ -6,7 +6,7 @@ export class AppController {
   constructor(private readonly appService: AppService) { }
 
   @Get()
-  @Render('landing')
+  @Redirect('/api', 301)
   root() {
     return { message: 'This is NestJs Application' }
   }
