@@ -26,7 +26,7 @@
     "migration:show": "npm run typeorm -- migration:show -d ./db/typeorm.config.ts"
   },
   "dependencies": {
-    "@nestjs-modules/mailer": "^1.6.1",
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/bull": "^10.1.1",
     "@nestjs/cache-manager": "^2.2.2",
     "@nestjs/class-validator": "^0.13.1",
