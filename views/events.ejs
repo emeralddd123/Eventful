@@ -2,14 +2,16 @@
 
     <div class="container">
         <h1>Available Events</h1>
-
-        <% events.forEach(event => { %>
+        <% if (events) { %>
+         <% events.forEach(event => { %>
             <div class="event">
                 <h5><%= event.name  %> </h5>
                 <p><%= event.description  %></p>
                 
             </div>
         <% }) %>
+        <% } %>
+        
         <p>EventBooker is your one-stop platform for discovering and booking exciting events happening around you.</p>
         <a href="/events" class="btn btn-primary">Explore Events</a>
         <br><br>
