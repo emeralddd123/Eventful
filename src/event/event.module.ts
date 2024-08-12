@@ -11,7 +11,7 @@ import { EventController } from "./controllers/event.web.controller";
 
 @Module({
     imports: [TypeOrmModule.forFeature([Event, User]), UserModule, ],
-    controllers: [EventApiController, EventController],
+    controllers: [EventApiController, ],
     providers: [EventService],
     exports: [EventService]
 })

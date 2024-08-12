@@ -9,7 +9,7 @@ import { TicketController } from './controllers/ticket.web.controller';
 @Module({
     imports: [TypeOrmModule.forFeature([Ticket]),
     ],
-    controllers: [TicketApiController, TicketController],
+    controllers: [TicketApiController],
     providers: [TicketService],
     exports: [TicketService]
 })

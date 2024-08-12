@@ -17,7 +17,7 @@ const jwtConfig: JwtModuleOptions = {
     imports: [TypeOrmModule.forFeature([User]), 
     JwtModule.register(jwtConfig),
     ConfigModule.forRoot({isGlobal: true})],
-    controllers: [AuthApiController, AuthController],
+    controllers: [AuthApiController, ],
     providers: [AuthService, JwtStrategy, LocalStrategy],
 })
 

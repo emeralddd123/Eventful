@@ -20,7 +20,7 @@ const jwtConfig: JwtModuleOptions = {
     ConfigModule,
     EmailModule,
   ],
-  controllers: [UserApiController, UserController],
+  controllers: [UserApiController],
   providers: [UserService,],
   exports: [UserService]
 })
