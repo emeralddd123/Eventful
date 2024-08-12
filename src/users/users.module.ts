@@ -6,7 +6,6 @@ import { User } from './user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { EmailModule } from 'src/email/email.module';
-import { BullModule } from '@nestjs/bull';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { UserController } from './controllers/user.web.controller';
 
@@ -17,7 +16,6 @@ const jwtConfig: JwtModuleOptions = {
 };
 @Module({
   imports: [TypeOrmModule.forFeature([User]),
-  BullModule.registerQueue({name: 'mail_queue'}),
     JwtModule.register(jwtConfig),
     ConfigModule,
     EmailModule,

@@ -7,13 +7,11 @@ import * as bcrypt from 'bcrypt';
 import { ActivateUserDto } from './dto/activate-user-dto';
 import { JwtModuleOptions, JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { EmailService } from 'src/email/email.service';
 import { EmailDto } from './dto/email-dto';
 import { ResetPasswordDto } from './dto/reset-password-dto';
 import { UserDto } from './dto/user-dto';
 import { plainToClass } from 'class-transformer';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UserService {
@@ -22,11 +20,9 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectQueue('mail_queue')
-    private MailQueue: Queue,
+    private eventEmitter: EventEmitter2,
     private jwt: JwtService,
     private config: ConfigService,
-    private emailService: EmailService
   ) {
     this.jwtOptions = {
       secret: process.env.SECRET_KEY,
@@ -52,8 +48,8 @@ export class UserService {
         enableCircularCheck: true,
       });
       const activationToken = await this.jwt.signAsync({ email: newUser.email, type: 'activation' }, this.jwtOptions)
-      await this.MailQueue.add('send_activation_mail', { ...resUser, activationToken: activationToken }, { attempts: 2 })
-      console.log(`send activation mail job started for ${resUser.email}`)
+      this.eventEmitter.emit('send_activation_mail', { ...resUser, activationToken: activationToken })
+      console.log(`send_activation_mail event emitted for ${resUser.email}`)
       return resUser
     } catch (error) {
       console.log(error)
@@ -91,7 +87,7 @@ export class UserService {
       return { status: 208, message: "Account Already Activated" };
     }
     const activationToken = await this.jwt.signAsync({ email: email, type: 'activation' }, this.jwtOptions)
-    await this.MailQueue.add('send_activation_mail', { ...existingUser, activationToken: activationToken }, { attempts: 2 })
+    this.eventEmitter.emit('send_activation_mail', { ...existingUser, activationToken: activationToken })
 
     // logger.info(`Resend Activation process triggered for user: ${email}`)
 
@@ -100,15 +96,15 @@ export class UserService {
   }
 
   async forgotPassword(forgotPasswordDto: EmailDto) {
-    const email = forgotPasswordDto.email
+    const { email } = forgotPasswordDto
     const resetToken = await this.jwt.signAsync({ email: email, type: 'forgot_password' }, this.jwtOptions)
     const existingUser = await this.userRepository.findOne({ where: { email: email } })
 
     if (!existingUser) {
       return { status: 404, message: "User With Email doesn't exist on this server" };
     }
-    await this.MailQueue.add('send_forgot_password_mail', { ...existingUser, token: resetToken }, { attempts: 2 })
-
+    this.eventEmitter.emit('send_forgot_password_mail', { ...existingUser, token: resetToken })
+    console.log(`forgot password mail emitted`)
     return { status: 200, message: `Password reset message sent to your mail` }
 
   }

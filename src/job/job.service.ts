@@ -1,7 +1,6 @@
-import { InjectQueue } from "@nestjs/bull";
 import { Injectable } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { Queue } from "bull";
 import { UpdateEventDto } from "src/event/dto/update-event-dto";
 import { EventService } from "src/event/event.service";
 import { TicketService } from "src/ticket/ticket.service";
@@ -11,8 +10,7 @@ export class Jobservice {
     constructor(
         private eventService: EventService,
         private readonly ticketService: TicketService,
-        @InjectQueue('notification_queue')
-        private queue: Queue
+        private eventEmmiter: EventEmitter2
     ) {
 
     }
@@ -32,7 +30,7 @@ export class Jobservice {
                 }
 
                 const userIdArray = Array.from(userIdSet)
-                this.queue.add('event_reminder', { eventId: event.id, userIdArray })
+                this.eventEmmiter.emit('send_event_reminder', { eventId: event.id, userIdArray })
 
                 // Mark the event as notified
                 const updateEventDto: UpdateEventDto = { notified: true }

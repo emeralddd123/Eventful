@@ -1,27 +1,21 @@
-import { Process, Processor } from "@nestjs/bull";
-import { Job } from "bull";
 import { TicketService } from "src/ticket/ticket.service";
 import { EmailService } from "src/email/email.service";
 import { ISendMailOptions } from "@nestjs-modules/mailer";
-import { ConfigService } from "@nestjs/config";
 import * as qrcode from 'qrcode'
 import { UserService } from "src/users/user.service";
 import { EventService } from "src/event/event.service";
-import { TicketPurchaseJobData } from "src/ticket/dto/ticket.dto";
+import { OnEvent } from "@nestjs/event-emitter";
 
-@Processor('notification_queue')
 export class NotificationService {
     private websiteUrl: string
     constructor(
         private readonly emailService: EmailService,
         private readonly eventService: EventService,
         private readonly ticketService: TicketService,
-        private readonly config: ConfigService,
-        private readonly userService: UserService
-
+        private readonly userService: UserService,
 
     ) {
-        this.websiteUrl = this.config.get('WEBSITE_URL') || 'http://localhost:3000'
+        this.websiteUrl = process.env.WEBSITE_URL || 'http://localhost:3000'
 
     }
 
@@ -35,10 +29,10 @@ export class NotificationService {
     }
 
 
-    @Process('ticket_purchase')
-    async ticketPurchase(job: Job<TicketPurchaseJobData>): Promise<void> {
+    @OnEvent('send_ticket_purchase_mail')
+    async ticketPurchase(data:any): Promise<void> {
         try {
-            const { ticketId, userId } = job.data
+            const { ticketId, userId } = data
             const user = await this.userService.findOneById(userId)
             const ticketData = await this.ticketService.getTicketById({ ticketId: ticketId })
 
@@ -48,7 +42,7 @@ export class NotificationService {
             const emailData: ISendMailOptions = {
                 to: user.email,
                 subject: 'Ticket Booking Confirmation',
-                template: './ticket_purchase',
+                template: 'ticket_purchase',
                 context: { name: user.firstname, event, id, qrCode: qrc, qUrl: verificationUrl },
                 date: Date.now().toString(),
                 attachments: [{ filename: 'Ticket_QR_code.png', path: qrc}, ],
@@ -67,13 +61,13 @@ export class NotificationService {
         }
     }
 
-    @Process('event_reminder')
-    async eventReminder(job: Job) {
+    @OnEvent('send_event_reminder')
+    async eventReminder(data:any) {
         try {
             console.log(`event_reminder job strated, `)
 
-            const eventId = job.data.eventId;
-            const userIdArray: Array<string> = job.data.userIdArray;
+            const eventId = data.eventId;
+            const userIdArray: Array<string> = data.userIdArray;
 
             const event = await this.eventService.findOne(eventId);
 
@@ -83,7 +77,7 @@ export class NotificationService {
                 const emailData: ISendMailOptions = {
                     to: user.email,
                     subject: 'Event Reminder',
-                    template: './event_reminder',
+                    template: 'event_reminder',
                     context: { name: user.firstname, event, },
                     date: Date.now().toString(),
                     text: `

@@ -1,11 +1,9 @@
 import { ISendMailOptions, MailerService } from "@nestjs-modules/mailer";
-import { Process, Processor } from "@nestjs/bull";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Job } from "bull";
+import { OnEvent } from "@nestjs/event-emitter";
 
 
-@Processor('mail_queue')
 @Injectable()
 export class EmailService {
     constructor(private mailerService: MailerService,
@@ -18,14 +16,14 @@ export class EmailService {
         return `${websiteUrl}/activate-account?token=${activationToken}`;
     }
 
-    @Process('send_activation_mail')
-    async sendActivationMail(job: Job): Promise<void> {
-        const { email, firstname, activationToken } = job.data
+    @OnEvent('send_activation_mail')
+    async sendActivationMail(data: any): Promise<void> {
+        const { email, firstname, activationToken } = data
         const url = await this.generateActivationUrl(activationToken)
         await this.mailerService.sendMail({
             to: email,
             subject: 'Welcome to Eventful App! Confirm your Email',
-            template: './activation',
+            template: 'activation',
             context: {
                 name: firstname,
                 url: url,
@@ -33,16 +31,17 @@ export class EmailService {
         });
     }
 
-    @Process('send_reset_password_mail')
-    async sendForgotPasswordMail(job: Job): Promise<void> {
-        const { email, firstname, token } = job.data
+    @OnEvent('send_forgot_password_mail')
+    async sendForgotPasswordMail(data: any): Promise<void> {
+        console.log(`forgot password mail recieved`)
+        const { email, firstname, token } = data
         const websiteUrl = this.config.get('WEBSITE_URL') || 'http://localhost:3000';
         const url = `${websiteUrl}/reset-password/${token}`
 
         await this.mailerService.sendMail({
             to: email,
-            subject: 'Your Forgot Password MAil has arrived from Eventfl App',
-            template: './forgot_password',
+            subject: 'Forgot Password Mail: Eventful App',
+            template: 'forgot_password',
             context: {
                 name: firstname,
                 url: url,

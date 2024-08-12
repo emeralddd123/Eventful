@@ -3,16 +3,14 @@ import { TicketApiController } from './controllers/ticket.api.controller';
 import { TicketService } from './ticket.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Ticket } from './ticket.entity';
-import { BullModule } from '@nestjs/bull';
 import { TicketController } from './controllers/ticket.web.controller';
 
 @Global()
 @Module({
     imports: [TypeOrmModule.forFeature([Ticket]),
-    BullModule.registerQueue({ name: 'notification_queue' }),
-        ],
+    ],
     controllers: [TicketApiController, TicketController],
     providers: [TicketService],
-    exports : [TicketService]
+    exports: [TicketService]
 })
 export class TicketModule { }

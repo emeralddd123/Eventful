@@ -1,6 +1,6 @@
 import { Module, } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './users/users.module';
@@ -14,7 +14,6 @@ import { AppConfig, DatabaseConfig } from './config';
 import { TicketModule } from './ticket/ticket.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import {redisStore} from 'cache-manager-redis-yet';
-import { BullModule } from '@nestjs/bull';
 import { NotificationModule } from './notification/notification.module';
 import { JobModule } from './job/job.module';
 
@@ -42,9 +41,7 @@ const jwtConfig: JwtModuleOptions = {
       // password: process.env.REDIS_PASSWORD, 
       // no_ready_check: true,
     }),
-    BullModule.forRoot({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-    }),
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
