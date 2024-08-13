@@ -26,7 +26,9 @@ export class UserService {
   ) {
     this.jwtOptions = {
       secret: process.env.SECRET_KEY,
-    }
+      signOptions: { expiresIn: '1h' }
+    };
+
   }
 
   private async hashPassword(password: string): Promise<string> {
