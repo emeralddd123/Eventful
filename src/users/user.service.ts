@@ -26,6 +26,7 @@ export class UserService {
   ) {
     this.jwtOptions = {
       secret: process.env.SECRET_KEY,
+      signOptions: { expiresIn: '1h' }
     }
   }
 
@@ -59,21 +60,28 @@ export class UserService {
   }
 
   async activateUser(activateUserDto: ActivateUserDto) {
-    const validToken = this.jwt.verify(activateUserDto.token, this.config.get('SECRET_KEY'));
-    if (validToken.type !== 'activation') {
-      return { status: 400, message: " Invalid Activation Code" }
+    try {
+      const { token } = activateUserDto;
+      const validToken = await this.jwt.verify(token, this.jwtOptions);
+      console.log(validToken);
+      if (validToken.type !== 'activation') {
+        return { status: 400, message: " Invalid Activation Code" };
+      }
+
+      const existingUser = await this.userRepository.createQueryBuilder().update(User)
+        .set({ isActive: true }).where({ email: validToken.email })
+        .execute();
+
+      if (!existingUser) {
+        return { status: 404, message: "User With Email doesn't exist on this server" };
+      }
+
+      // logger.info(`User: ${existingUser.email} activated their Account Succesfully`)
+      return { status: 200, message: `Account activated succesfully` };
+    } catch (error) {
+      console.log(error);
+      throw new HttpException('An Error Occured', HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-    const existingUser = await this.userRepository.createQueryBuilder().update(User)
-      .set({ isActive: true }).where({ email: validToken.email })
-      .execute()
-
-    if (!existingUser) {
-      return { status: 404, message: "User With Email doesn't exist on this server" };
-    }
-
-    // logger.info(`User: ${existingUser.email} activated their Account Succesfully`)
-    return { status: 200, message: `Account activated succesfully` }
   }
 
   async resendActivationMail(resendActivationDto: EmailDto) {

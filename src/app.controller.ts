@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Render, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Query, Redirect, Render, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AppService } from './app.service';
 import * as QRCode from 'qrcode'
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -8,7 +8,7 @@ export class AppController {
   constructor(private readonly appService: AppService) { }
 
   @Get()
-  @Render('landing')
+  @Redirect('/api', 301)
   root() {
     return { message: 'This is NestJs Application' }
   }
