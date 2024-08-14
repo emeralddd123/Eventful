@@ -16,7 +16,6 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { NotificationModule } from './notification/notification.module';
 import { JobModule } from './job/job.module';
 
-
 ConfigModule.forRoot()
 
 const jwtConfig: JwtModuleOptions = {

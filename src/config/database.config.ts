@@ -1,18 +1,20 @@
 import { registerAs } from "@nestjs/config";
-import { join } from "path";
+import { config as dotenvConfig } from 'dotenv';
+import { DataSource, DataSourceOptions } from "typeorm";
 
-export default registerAs('database', () => ({
+dotenvConfig({ path: '.env' });
+
+const config = {
     type: 'mysql',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT, 10) || 3306,
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    entities: [`${__dirname}/../**/*.entity{.ts, .js}`, join(__dirname, '..', '**', '*.entity{.ts,.js}', "dist/entity/**/*.js"), // Look for entities in subfolders of the parent folder
-    join(__dirname, '..', '..', '*.entity{.ts,.js}'),],
-    synchronize: process.env.NODE_ENV === 'developmen',
-    logging: process.env.NODE_ENV === 'development',
-    migrations: [`${__dirname}/../../db/migrations/*{.ts,.js}`],
-    migrationsTableName: 'migrations',
+    host: `${process.env.DB_HOST}`,
+    port: `${process.env.DB_PORT}`,
+    username: `${process.env.DB_USER}`,
+    password: `${process.env.DB_PASS}`,
+    DB: `${process.env.DB_NAME}`,
+    migrations: ["dist/migrations/*{.ts,.js}"],
     autoLoadEntities: true,
-}))
+    synchronize: false,
+}
+
+export default registerAs('typeorm', () => config)
+export const connectionSource = new DataSource(config as DataSourceOptions);

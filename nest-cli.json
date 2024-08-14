@@ -7,6 +7,16 @@
       {
         "include": "/email/templates/**/*",
         "outDir": "dist"
+      },
+      {
+        "include": "../assets",
+        "outDir": "dist/public",
+        "watchAssets": true
+      },
+      {
+        "include": "../views",
+        "outDir": "dist/views",
+        "watchAssets": true
       }
     ],
     "watchAssets": true
