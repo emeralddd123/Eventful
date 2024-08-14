@@ -10,7 +10,7 @@ export default registerAs('database', () => ({
     database: process.env.DB_NAME,
     entities: [`${__dirname}/../**/*.entity{.ts, .js}`, join(__dirname, '..', '**', '*.entity{.ts,.js}', "dist/entity/**/*.js"), // Look for entities in subfolders of the parent folder
     join(__dirname, '..', '..', '*.entity{.ts,.js}'),],
-    synchronize: process.env.NODE_ENV === 'developmen',
+    synchronize: process.env.NODE_ENV === 'development',
     logging: process.env.NODE_ENV === 'development',
     migrations: [`${__dirname}/../../db/migrations/*{.ts,.js}`],
     migrationsTableName: 'migrations',
